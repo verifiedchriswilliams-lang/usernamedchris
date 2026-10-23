@@ -19,7 +19,7 @@
 /* Layout: marquee nav; a hero that IS the voice agent (avatar + talk UI); a 4-card video grid; a full-width "station" band; a plain link row. */
 :root{
   --bg:#F5F1EC; --fg:#17161A; --muted:#6E6A66; --line:rgba(23,22,26,.09); --panel:#FFFFFF; --panel-2:#ECE7E0;
-  --accent:#1EE58A; --ink-on-dark:#F2EEE8; --dark:#141210;
+  --accent:#E8408F; --ink2:#2E2BE8; --grad:linear-gradient(135deg,#2E2BE8,#B02BD0 55%,#E8408F); --ink-on-dark:#F2EEE8; --dark:#141210;
   --card-shadow:0 10px 30px rgba(40,30,20,.12), 0 2px 6px rgba(40,30,20,.06);
   --card-shadow-hover:0 24px 60px rgba(40,30,20,.20), 0 4px 10px rgba(40,30,20,.08);
   --font:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"Geist Mono","SF Mono",ui-monospace,monospace;
@@ -60,21 +60,20 @@ h1,h2,h3{text-wrap:balance}
 .talk h1 em{font-style:normal;color:var(--muted);font-weight:600}
 .talk .lede{margin:0 0 22px;font-size:17px;line-height:1.5;color:var(--muted);max-width:52ch}
 /* the ElevenLabs widget sits in the open, full width, with only a status line above it */
-/* the agent panel: a two-column card. Left: what this is. Right: the ElevenLabs widget, which renders at its own fixed size (~400px wide), so the column is sized to it. */
-.agent{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;padding:22px 26px;border-radius:20px;background:var(--panel);box-shadow:var(--card-shadow)}
-.agent .about h3{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.01em}
-.agent .about p{margin:0 0 12px;font-size:14px;line-height:1.5;color:var(--muted)}
-.agent .status{display:flex;flex-wrap:wrap;gap:6px 14px}
-.agent .ask{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.agent .ask span{font-size:12.5px;padding:5px 10px;border-radius:999px;background:var(--panel-2);color:var(--fg)}
+/* the agent tile: wears the portrait's gradient; its button opens the floating ElevenLabs widget */
+.agent{position:relative;overflow:hidden;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:22px 24px;border-radius:22px;color:#fff;background:var(--grad);box-shadow:0 18px 40px rgba(90,40,200,.28)}
+.agent:after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:14px 14px;pointer-events:none;mask-image:radial-gradient(120% 80% at 100% 0,#000 20%,transparent 70%)}
+.agent .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.85;margin:0 0 6px}
+.agent h3{margin:0 0 4px;font-size:22px;font-weight:700;letter-spacing:-.02em}
+.agent .what{margin:0;opacity:.9;font-size:14px;line-height:1.45;max-width:40ch}
+.call{position:relative;z-index:1;display:inline-flex;align-items:center;gap:10px;font:inherit;font-weight:600;font-size:15px;padding:14px 22px;border-radius:999px;border:0;background:#fff;color:#1a1740;cursor:pointer;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.2)}
+.call:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.call .dot{width:10px;height:10px;border-radius:50%;background:var(--grad)}
 @media (max-width:860px){.agent{grid-template-columns:1fr}}
 /* the ElevenLabs widget is a floating launcher by design: pinned bottom-right, sized with its own custom properties (per their docs) */
 elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlabs-convai-widget-width:400px;--elevenlabs-convai-widget-height:600px}
 @media (max-width:768px){elevenlabs-convai{bottom:0;right:0;left:0;--elevenlabs-convai-widget-width:100%}}
 .fine{margin:0;font-size:12px;line-height:1.4;color:var(--muted)}
-.call{display:inline-flex;align-items:center;gap:10px;font:inherit;font-weight:600;font-size:15px;padding:14px 20px;border-radius:999px;border:0;background:var(--fg);color:var(--bg);cursor:pointer;white-space:nowrap}
-.call:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.call .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
 .agent .status{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .agent .status b{color:var(--fg);font-weight:600}
 
@@ -151,16 +150,15 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
   <div class="avatar" id="avatar"><img src="media/avatar.jpg" id="avatarImg" alt="Voxel portrait of Chris Williams" width="900" height="900"></div>
 
   <div class="talk">
-    <h1>Hi, I'm Chris. <em>Or close enough.</em></h1>
-    <p class="lede">I build products at the intersection of media, audio, and AI. Four of them are below. Or skip the reading and just ask me.</p>
+    <h1>Hi, I'm UserNamedChris</h1>
+    <p class="lede">I build media, audio and AI products people love. Wanna know more about me? Start a conversation with my AI agent, Other.Chris (OC).</p>
     <div class="agent" aria-label="Voice agent">
-      <div class="about">
-        <h3>Meet Other.Chris</h3>
-        <p>A clone of my voice, trained on what I've built and how I talk about it. It picks up instantly and it's never had a bad day.</p>
-        <div class="status"><span>Voice <b>Chris, cloned</b></span><span>Runs on <b>ElevenLabs</b></span><span>Knows <b>this site</b></span></div>
-        <div class="ask"><span>What's relaxed.app?</span><span>Tell me about The Prob</span><span>Why Nashville?</span><span>Are you available?</span></div>
+      <div>
+        <p class="k">Live · voice agent</p>
+        <h3>Chat with Other.Chris (OC)</h3>
+        <p class="what">The version of me that never sleeps. Ask it anything.</p>
       </div>
-      <button class="call" type="button" id="openAgent"><span class="dot"></span>Talk to Other.Chris</button>
+      <button class="call" type="button" id="openAgent"><span class="dot"></span>Talk now</button>
     </div>
   </div>
 </section>
@@ -168,7 +166,7 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 <div class="wrap">
 
 <!-- CARDS -->
-<div class="label"><h2>Things I've built</h2><span>Four live products. Each one is a real thing you can use today.</span></div>
+<div class="label"><h2>AI side quests I'm currently building</h2></div>
 <main class="grid" id="grid">
   <a class="card" href="https://relaxed.app" data-tone="dark">
     <video src="media/relaxed.mp4" poster="media/relaxed-poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
@@ -214,7 +212,7 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 </section>
 
 <footer class="foot">
-  <span><b>Chris Williams</b> · Nashville, TN</span>
+  <span><b>Chris Williams</b></span>
   <span>UserNamedChris, everywhere</span>
   <span><a href="https://www.linkedin.com/in/usernamedchris/" target="_blank" rel="noopener">Say hi on LinkedIn →</a></span>
 </footer>
