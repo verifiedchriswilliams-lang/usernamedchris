@@ -7,10 +7,10 @@
 <meta name="description" content="Chris Williams builds products at the intersection of media, audio, and AI. relaxed.app, Trending in Real Time, The Prob, and more.">
 <meta property="og:title" content="UserNamedChris">
 <meta property="og:description" content="Products at the intersection of media, audio, and AI. Talk to the clone.">
-<meta property="og:image" content="https://usernamedchris.com/media/avatar.jpg">
+<meta property="og:image" content="https://usernamedchris.com/media/photo.png?v=2">
 <meta property="og:url" content="https://usernamedchris.com/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="media/avatar.jpg">
+<link rel="icon" href="media/photo.png?v=2">
 <style>html{color-scheme:light dark}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist+Mono:wght@400;600&display=swap">
@@ -46,21 +46,29 @@ h1,h2,h3{text-wrap:balance}
 @keyframes rail{to{transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){.rail{animation:none}.bars i{animation:none !important}}
 
-/* ===== hero: the voice agent, growing out of a voxel field ===== */
+/* ===== hero: portrait + the voice agent ===== */
 .herowrap{position:static;overflow:visible;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px))) 0 calc(-1 * max(16px,env(safe-area-inset-right,0px)));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-#field{position:absolute;left:0;top:0;width:100%;display:block;pointer-events:none;z-index:0}
 .top{z-index:10}
-.hero{position:relative;display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:56px;align-items:center;padding:72px 0 64px;max-width:1260px;margin:0 auto}
+.hero{position:relative;display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:56px;align-items:center;padding:64px 0 56px;max-width:1260px;margin:0 auto}
 @media (max-width:860px){
   .hero{grid-template-columns:1fr;gap:18px;padding-top:20px;padding-bottom:28px}
-  .avatar{width:min(58vw,230px);margin:0 auto}
   .talk h1{font-size:32px;white-space:nowrap;letter-spacing:-.035em}
   .talk .lede{font-size:15.5px;margin:0 0 14px;max-width:34ch}
   .agent{grid-template-columns:1fr;gap:12px;padding:18px 18px 16px}
   .call{justify-content:center;width:100%}
 }
-.avatar{position:relative;z-index:-1;aspect-ratio:1;max-width:100%;overflow:hidden;background:var(--panel-2)}
-.avatar img{display:block;width:100%;height:100%;object-fit:cover;will-change:transform}
+.avatar{position:relative;aspect-ratio:1;width:min(100%,300px);border-radius:50%;overflow:hidden;background:var(--panel-2);box-shadow:0 0 0 5px var(--panel),0 0 0 6px var(--line),0 10px 24px rgba(40,30,20,.10)}
+.avatar img{display:block;width:100%;height:100%;object-fit:cover}
+.avatar-phone{display:none}
+@media (max-width:860px){.avatar-phone{display:block}}
+/* phones: the photo becomes a chip beside the name, Bill-style, instead of a screen-filling circle */
+@media (max-width:860px){
+  .hero{display:block}
+  .avatar-desk{display:none}
+  .talk .top-row{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+  .avatar{width:72px;flex:0 0 72px;margin:0;box-shadow:0 0 0 3px var(--panel),0 0 0 4px var(--line),0 8px 18px rgba(40,30,20,.16)}
+  .talk h1{margin:0;flex:1;min-width:0}
+}
 .talk,.label,.grid,.station,.links,.foot{position:relative;z-index:1}
 .talk{min-width:0}
 
@@ -155,10 +163,10 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 </div>
 <div class="herowrap">
 <section class="hero" id="about">
-  <div class="avatar" id="avatar"><img src="media/avatar.jpg" id="avatarImg" alt="Voxel portrait of Chris Williams" width="900" height="900"></div>
+  <div class="avatar avatar-desk" id="avatar"><img src="media/photo.png?v=2" id="avatarImg" alt="Chris Williams" width="1000" height="1000"></div>
 
   <div class="talk">
-    <h1>Hi, I'm UserNamedChris</h1>
+    <div class="top-row"><div class="avatar avatar-phone" aria-hidden="true"><img src="media/photo.png?v=2" alt="" width="1000" height="1000"></div><h1>Hi, I'm UserNamedChris</h1></div>
     <p class="lede">I build media, audio and AI products people love. Wanna know more about me? Start a conversation with my AI agent, Other.Chris (OC).</p>
     <div class="agent" aria-label="Voice agent">
       <div>
@@ -226,137 +234,19 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 </footer>
 </div>
 
-<canvas id="field" aria-hidden="true"></canvas>
 <elevenlabs-convai agent-id="agent_3001m5ka8b2mecrrg64axxz9fp3x" variant="expanded" dismissible="true"></elevenlabs-convai>
 <script>
 // phone headline: shrink to fit one line
 (function(){const h=document.querySelector('.talk h1'); if(!h) return;
-  function fit(){ if(innerWidth>860){h.style.fontSize='';return;} let fs=34; h.style.fontSize=fs+'px'; const max=document.querySelector('.hero').clientWidth; while(h.scrollWidth>max && fs>18){fs-=1; h.style.fontSize=fs+'px';} }
+  function fit(){ if(innerWidth>860){h.style.fontSize='';return;} let fs=34; h.style.fontSize=fs+'px'; const max=document.querySelector('.hero').clientWidth-(innerWidth<=860?72+14:0); while(h.scrollWidth>max && fs>18){fs-=1; h.style.fontSize=fs+'px';} }
   fit(); addEventListener('resize',fit); document.fonts&&document.fonts.ready.then(fit); })();
 // marquee
 const rail=document.getElementById('rail'); rail.innerHTML=rail.innerHTML.repeat(4);
-// ===== voxel field: the portrait stays whole; color explodes out of it onto a grid that runs under the page =====
-(function(){
-  const cv=document.getElementById('field'), img=document.getElementById('avatarImg'), av=document.getElementById('avatar');
-  const N=44;                      // blocks across the portrait
-  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // the portrait's own 45x45 block colors, baked in so the field uses its real palette
-  const HEX='0027d80026d90027dd0027e20025f40023fd1218fc2613fc3d0efc5507fb6c03fc8203fb9902fba702fcb801fac502f8d102ede302e7ea01dcf201d4f702c5f602b4f0029bf1038ff0037bf20a6cf51263f51a52f82449f82e3ef83b30f94529f9521ffa6116fa6912fa7b0cfb8607fb9403fba102fbac00fbb801fcc201fcce01fcd3010022c20022c70024cc0023d40021e2001ee90f15ed230fee3c0bee5405ed6b03eb8103ed9102eba102eaab01e5ba01e1c701ddd401d1dd00c8e400bee601b2682826912b34e6017fe6026fea0761ee0d58f1134bf31b41f32335f62f28f73921f8441af95113f85b0efa6a0afa7406fb8103fa8c01fa9b01fba701fab100fbbd01fbc3010022c40021c30022c80020d3001fe1001ce70e11eb250fee3f06ed5a04ed7802eb8c02ed9c02ebaa01eab401e4c301dfca02d565223448271580382f99614249281731180d743a208c4623e81258ed0b58ef0f4ef31843f42337f72e2af73623f7401bf84d13f95a10fa630cfa6c08fa7804fa8502fb9201fb9f00fbac01fbb601fbbe010021c50023c70023ce0022d30021e3001cea1612ee2b0aee4a06ee6a03ed8a02ed9a02eca802e9b202e7c300df722940552a1e57301b2111094c2a182c190f9863471a0c064122132c150b7d4026c66344e90f4ef11548f41e3bf62b2ef73327f73c1ef84915f95610f9610cfa6a08fa7304fa7e02fb8d01fb9b00fba500fbb100fbb9000023c80023c90023ce0023d50021e4071beb1f10ec390bed5306ec7703ed9603eda303ebb202e6b605d96e26432f190d2d180d2d190f8c5b3e25140a3b20135334255934232a150c65331c351c0f673622924b2dea2549ed253bf32432f52d29f53621f74318f85013f8590ef9620af96c05f97803fa8502fa9301fb9f00fbac00fab2010021c80023cc0022d10022da0020ea0e14ec280eee4008ed5f05ee8202ee9f02ecb002ecb801e359242e2b170c2a180d21110a4c2d1c3d271c996f5726150e2b181173584a392119734735562f1f341d1480452aac694870371de52b2df4262ef52f24f73d1cf84716f85211f95a0cf96407fa7005fa7d03fb8a00fb9700fca200fba7000022c70025cd0024d30022db011de71514ea2d0ceb4b07ee6a04ec8a01eaa802ebb201e5ac1ea95c3c28ac7f63462e2036211726150d2c1b13926f62816052382725dcbfb320130e7754495b382e29161083513e4320129c5b3d703013e6332ef52c2bf63722f74119f84f14f8560ff95f0afa6b08fa7604fa8301fb9200fc9c00faa0000022cb0023cb0022d30020dd0219e9180fea350bef5004ed7202ec9402ecab01e8bc02ea7e25612c180dc3987b4732276446392517112e1e193829234b38341f14118f76711e110b3e2925482e262d1b155633265a34264c23156e2f13813318f3252df62f25f73f1ef84916f95112fa5b0ef96209fb7006fb7d02fb8a01fb9101fb9b010021ca0023d00024d60020e00514e9200fec3b06ec5804ec7c02eba002ecb501e7bb0bca4f252a2a180e35241ab08b7649352c654c43160d0926171046322d23140f6f524a39211827150e41271f1c0d0721120b5c392b5c3323763f26a14c24f01c30f5282af73520f94419f94b13f8540ffa600bfa6b06fa7802fa8201fb8d00fb94000024cf0024cf0024d9001fe20e16ea250deb4609ed6305ee8603eba903ecbe02e7c801dc620f5f42291a36211649382ebb988655403770564d321b113c2115553123754a39643a2a49271945251a43251861392a5b342585513a4e2715642f1abb5224f4242ff52e24f63b1cf94715f85011f9590df86709fa7404fa7d01fa8500fb91000024d10023d30023da001be51012eb290ceb4807ed6704eb8d02ecab02eac001e2ae0dac22130c1d100926150c27140a6c3a208459447f533f794c385c2e18a65c35884727bc6d4384482cd47f4f9e5839552a189b55356d321a422116693019e51640f21d37f62a2cf73721f73f1af74814f8530ffa600bfa6c06fa7602fb7f01fa87000025cf0024d20023da021ae71411e8310aeb4d05ec6d04ec9202eab002e8cc01e4cf06cd44172e1f120b1b0e08703816ba5d26bf6129d27438ec8b48e88542ee8d4aef9252fbaf74fbaf73faaa6afaa86aec9252f99d55ee9e534320125628169c3329f11840f42334f62f26f7381ff84219fa4d13f95a0efa6609fa6f04fb7a02fa81010023ce0022cf0021d80215e4170fea3409eb5505ed7102e99602ebb501ead202e1cc05c539211f27170e865433b75d28c8672cd36f32e38141f18f4cf08b47f99e5cfba96cfcb37dfbb683fbb079fcb987fbb781fbaf6efba755c6824e552e1eb25020f11249f31b3af6272cf73124f8391cf94516fa5311fa5f0bfb6706fb7203fb7b010023ce0023d10022d90515e61d11eb3a07ee5503ec7704ec9b02ecba01e7d501dfbe0da923160e423126bb845fbd622cd06e31dd7b3cdb773be78243ea8545f99f5dfba366fcb37cfcb582fcba87fcc091fcba88fcb272fcac5bf49d62693e2d88330fef0c52f31743f52133f62929f73220f84019f94c14fa590efa610afa6d06fa77020024d10024d30023de0816ea2111ed420aef5d05ee7e04eda102ecc202e9d701dde702db492031433228ac795abe632bd27234d97637e17f40f69858f29150faa363faa163faa366fbac75fba86dfcb27ef5945efbab6efca658f8a563b57e64d0164aeb0859f1104bf31a3af3222ef52d25f83a1cf84816f85212f95b0cfa6508fa71040025d30023d40021e00b14eb230eee4207ee6004ef8002eba101ecc101e6da01e0e301d6892b6b705a4d6f4d39c0662ecd6e32db7a3ae88847f89c5af9a364faa86cf8995af99a5bfbab72fbb47ffcbe8bfbb37cfaa563fba152e68b4cab775cdf3a51e80364f10b55f11440f41e36f4262af7311ff73d19f94914fa550ffa5f0afa6a060026d40024d4001fdb0d13e9250fec4205ed6304ee8204eda402ecc001eada02e1e702db7527566450468b522fc66c34d6783ae98c4aea8a4ded8950f1915cfcb585f8985ff8945af89963fba979fcb788fcb983fbb574fbaa5cfaa05080523ca92a44e5026eee085ef11148f31a3cf42232f62b26f83a1ef84418f95112fa5b0dfa66080023d10023d30020df0d11e8220dec3e04ea6405ed7d03eb9f02ebbc01e7d601e1df14c6b71293392c26ce763dcf783eea9250faaf73f8ae7ae37d4dde7547f79365f08251ed7949f99f73faac83fbae84fbbc91fcc693fcbe74fbaf5c5b301cdd4569e10278ec0468f00c52f21246f31a38f5242cf73021f83e1bfa4a15f9540ffa5d090024d20023d4001edb0d13e7220dea4505ee6003ec7d03ed9e01ebb701e7d001ddec8050df7a3d522e1dd17c42b16b419a5b3ca16143b07155b76d4fb55736eb8456f1905ee26c42f08d65c56c4ca76349b16e51c7805de7955cfcb565a8512afba460e32c76e8036fee075cf10e4ef31640f41e32f62c27f8371ef84116f84f11f9590b0022d60021d4001edf0d11ea240eec4305ed5f04ee7903ee9902edb501eacf01e5ce5725912a0e774e39d1814aaf6b439047273d2114100d0d5627174c15067d3314faa773faaf895e1e0e6522111e0a0228140d834326e3905cfcaf61b66e45cc2d16f77766e50278eb0464ef0957f11247f31938f4242af73221f83c19f84614f9540d0022d60021d8001ce00d0feb240cf04103ed5b02ed7802ef9201ebae01ebc300e6dd632adb6c35784634cf7e48a35425874123b36551905240af5f4e863c2465280efaa16bfbb88bab5e3c9d3923974e3abf7a6dd88163ce7338fbae61cf7d56f56438f15d6be2017be8016bec055fef0d4df31540f61f31f72b26f7361cf73d14f84c0f0025d30023d5001fe00d11e9220dec3d03ec5a05ef7203ed9002eca801eab701e9d04b76d6602a842911d7844ae78e4ecd743bac5324b05832c67251ac532e973e1cf78d5afcb485f29669c06645ba592fcd7343e98947fcb56cfcb968c03212fb9f58d20d85de0180e70271ed0469ee0a54f21149f31b38f5252bf62f20f73b1af847120023d30023d20020dd0913e71b0deb3907ec4d03ea6803ec8803ed9d02e9ae02e8c734b5e3753ab35228c77844ef9859f69556f9995bf59059eb8653c55c31b24e27f99060fcb183fba073fa9b72f98a56f99255fcb37dfcb373fcaa5ed24019faad5ece0193dc0188e40276ea036eec055cf00c50f3163ff62131f62a25f6341cf741150024d30024d50023db0116e7170feb3307ed4b05ec6406ee7c03ee9301eaa902ebab01eae57e48bc5623b46b3edb8046f79c5dfbad78fb9e6fed8254a94727d96c41fb956afba87efa9e71f49b75f99265fba67afcbe98fca970fa9d53f78e4cf2885fcb0196db028ddf027de80275ea0463ef0855f21145f41936f4212af62c22f839190025d70023d60020d90017e8100fee2a08ee4105f05604ee6f03ee8b02ee9d02efa201efd26066ca622ab16a3fbf6736f09460fba87aef8d67ab4229c95c38d76c45fb9c74fccbb0fba476c75239d6613df48f65fbac80fcaf78f89a52fba056c92f94c20099d30191db0283e10179e7026bec045df00b4df2123df31930f32225f62f1c0024d40021d20023db001ce40d11ef230aee3604f04c04f06203ef7b01ef9001ed9202f08901ebc15743bb7040b36133d97747e88359c15a3ac0512b9c4026933f26d36a49e3815ece6848f79675c65332d56740f49465fa9f62fba455cf4d82ae01afbe00a2ce0198d40189dd0181e10172e80266ee0757f00d47f01339f11c2ef424240025d40023d40021db001ce10513ea1d0ceb2e07ee3d03ed5302ec6c02ec7e02ed8301ec7f01eb7c00ebc37749bc6b3ad17444c26239e17c4fd56f42aa553177392178331fba745bf1a588fbab89fb9e77a64323e68853f49857fca9599a00c0a901b4b900a4c6019ad0018ed90188db0177e2016ce8045eec0a4cef113ef01733f21d290025d20023d30021d5001ede0116e9120feb240aee3406ed4903ee5a03ee6f02ed7502ed7501eb7001eac77b4ac16f3bd67239d17745b0673faf6339a5633eb9704eca7b5cd9885eeea47cea9c74d58963e38f64e98b50f59a57fca5569400c1a201b3ae00a5bb019cc70190d10189db027ee00171e50365ea0656ee0949ed1139f117300024d20023d00022d5001fdb001be80b12ee1b0cee2909ee3a07ee4902ee5f03ed6603ef6602eb6302eca95c61b46331da783bd37d466d30167a2e1c9d3c29b24230da614ccb4f40c95a45c35944ba6f49c76a37f49758ee9251e9875e8d01c59c00baa601a6b601a0be0191cc018ed00182db017ade026ae3025be9064eec0c3ff010360021d00021d30022d9001edd001be90114ed110cef1e08ef2e05ef3f03ee5202f15701ee5c02f05a01ed5d07e7b56433bb6632e28a4ee2874cb75b2cbb4530e5584ef06a64f97c79f6786cfba36cfcaf70e47f3fe0884ee78e4eaa2fad8a00cb8f00b4a200aea6019cbd019cc10190ce0189d0007cda0172e20264e40256e60649ec073e0022d20020cf0021d5001dd7001ae50017ec070eef1209ee2006ee3203ee3d01ed4702ee4d01ec4e01ec5001ec6e23a4bd6b38b86530e3874cd07239ab572aaa562eac5430c26e41e7915bfaa565fcaa69ef995be38a4dd476687701d08000c98a00be9600b1a200a6ae009eb90098c0008ccd0087d4007bda016edf0164e10254e7044a0021d00020ce0020d4001fd7001de0001aea0011ea080beb1408ee2404ee3303ee3903ef3d02ee4201ee4301e876358f9e4e22a15528c46f3ae88d50db7b42d37140e47d52f8a46efba86bfbab6cfcb577e5945bd98045ba55906e01cb7700cc7d00bc8d00b69700a9a700a2b0009ebb0095c2008cc90082d30177d70169de025fe202550021d00021d0001fd0001fd9001de0001aea0013ec0011f10c0cf01807ef2605f12d01f03201ed2d0f87110e119f5b2fba5d298f461f9c542ace753fdc7b44f39260fa996ffcb791fcbd8efbae72e89c66ca7a49f48f48dc924e5c202d6f00cd7b00c78800bc9200aba000a4ac00a3b5009aba0091c40088ca017bd10070d80166dd015f0021cf0021d10020d4001fd5001ee2001beb0017eb0014ef0010ef100cef1a06f127129d14131a16151b110d0fc4652dc96931af5422823e19914c27b86133e68859e9885ff4996ef9a779e89965b56c43ea8847fa9c54fba5587b492b49221a6c26368605af8f01ba9401a79c00a3a40098af0095b9018bbf0180c8017acf0170d201680021d40020d30020d80020da001fe6001eef0018f10015f10010f21617a116161d1313180e0d1115131a140f11c3642ccf6f35c2632caa501f8a3c15844423be6e46c6734ece7a51c87a52b36235e17e42f79959fba15cfba15e7b452c2516162f1c1d4b231a891e5b9100ab9a00aba200a2ad009fb60093bb0088c10081c70176ca006d0021d60021d50021d7001fda001fe6001fed001def0d1d9b15151c1212181110160f0e130c0b0f16141b0f0d1268371bc8672fc86930bf5e2aae5121904018793514763415924a26cf7845e6864aee8e50f99e60fba060f598591f121121151723171b281818391d194e2419712d19a304a3a0009eac009bb50093ba008bbd007dc400770022da0022d60021dc0020e30624de112aa516192214151e11111811121814151c13131a0b0b0f111015131218100f13ad5c2cc6672fd07038cd6b32ae52229742178c3a12da8149e48c54e78648f59b5cf69a5df9a0614c2c201e16191d131625191a2818182d1a18371f1b432219552819b22a56b31385b2019cb60093ba0088bf007e0022d90022d90023e20e2190191c31151720181a2416171f11111810101616161e16161e0d0c110d0c11131118131118261916a55528c76a33cb6c37df824ac26431a64b1db25727d87b43f39a60f49c62f2995f8853371d171c20181c1a1114251b1e2b1b1d2115152b1919361e193b1f194020195f2b19982d359c2254af008eb000850027e10021d8181a2c1b1c26181921111219101017191a221919210d0d1214141c15141c18171f0f0e140d0c1015141a15141a1c15179e5a34bf5f2ce3874ee88f57d57944cd6f3bd5743df5a068eb8c559760421914191f191e21181c140f13281d2224191c2215172d1d1d2e1b1b2b1817341b18331a154922195c2a19832d2da300880d21a411111813141b12121913141c12131b0d0d1311111814151d0a0a0e10101713131a12121914131a0d0d110d0c11131219111116100f15121015e28852f6a66fea8f59db7d46de7e44f29a64e088561210151614191c181e1611161511161a151c17131816111620181e1d161a1d14181e15182014162818182d19193d1e1a5b271812141c14151e14161f17172110111716172015161e10111715151d12121913121914141b14141b14141b14131a1312190c0b10100f1413131913121812111779533fa97556a269489d603d1b141814121816141918141a1411160f0d101a161b1e181e1d161a1b1417231a1f23191d1e1416281a1b2215152b19182f1b1a2917163d1f1813151d14151e14141d17182111111717192218192211111714141c14131a12121814131a15151c18171e15141b17161d1918200e0d110b0a0e16141a15141a1312181412181513181210161513191a171d1613190d0b101c171c1c171c1c171d1d171d1c151a1b131620181d21171b23171a24181a21141627181929191a241515341c1910111714151d15161e15151e11111715161e18182213131a12121915141c14141b14131a17161e17161f16151c16151c16151d14131a1210170c0b0f0e0d1114121815131a15131a1412191412181512190e0c1114121818161d17151b19161e1b181f19161c19151c1c19201d181f1813191f19201c161d1f181e1712171c15191f161b0f111813151e12131b13141c11111813141c16172013141c12121912121912111812111714141c17161e13121913131a14141b15141b14131a16151c15131916141a15121814111616131815121715131718151b17141a1a161c1713191713191c171d19151a1914191e181d1913161d15191c151921171a1f15181c1315231718241617';
-  const pal=new Uint8Array(N*N*3); for(let k=0;k<N*N*3;k++) pal[k]=parseInt(HEX.substr(k*2,2),16);
-  const colorAt=(i,j)=>{const ci=Math.max(0,Math.min(N-1,i)),cj=Math.max(0,Math.min(N-1,j)),k=(cj*N+ci)*3;return [pal[k],pal[k+1],pal[k+2]]};
-  // palette is sampled at the render's own block centers, so build it with the same phase
-
-  const hash=(a,b)=>{let h=(a*73856093)^(b*19349663);h=(h^(h>>>13))*1274126177;return ((h^(h>>>16))>>>0)/4294967296};
-  const lerp=(a,b,t)=>a+(b-a)*t, sm=t=>t*t*(3-2*t);
-  function vnoise(x,y){const x0=Math.floor(x),y0=Math.floor(y),fx=sm(x-x0),fy=sm(y-y0);return lerp(lerp(hash(x0,y0),hash(x0+1,y0),fx),lerp(hash(x0,y0+1),hash(x0+1,y0+1),fx),fy)}
-  const noise=(i,j)=>0.7*vnoise(i/5+11,j/5+5)+0.3*vnoise(i/2.2+3,j/2.2+17);
-  const bgColor=()=>{const m=getComputedStyle(document.body).backgroundColor.match(/\d+/g);return m?m.slice(0,3).map(Number):[245,241,236]};
-  let blocks=[], pitch=10, W=0, H=0, dpr=1, mouse={x:-1e4,y:-1e4}, base=null, far=null, ox=0, oy=0, aw=0;
-  function build(){
-    img.style.clipPath='none';
-    const a=av.getBoundingClientRect(), BG=bgColor();
-    W=document.documentElement.clientWidth; H=document.documentElement.scrollHeight;
-    dpr=Math.min(2,devicePixelRatio||1); cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px';
-    pitch=a.width/N; aw=a.width; const PH=(16.5/1254)*aw; const oy0=a.top+scrollY; ox=a.left+PH-pitch; oy=oy0+PH-pitch;   // align to the render's own seam phase
-    const tk=document.querySelector('.talk').getBoundingClientRect(); const stacked = tk.top >= a.bottom-2;
-    // everything is measured from the face, in blocks: solid out to R0, then thinning, then the odd block far away
-    const fcx=a.left+aw*0.5, fcy=oy0+aw*0.47;                 // face center
-    const R0=11, R1=26, RCOLOR=34;                        // solid radius (the face); cloud span; color drain span
-    const cols=Math.ceil(W/pitch)+1, rows=Math.ceil(H/pitch)+1, i0=Math.floor(-ox/pitch)-1, j0=Math.floor(-oy/pitch)-1;
-    // a few "pockets" down the page where debris collects, like it drifted and settled
-    const pockets=[]; for(let k=0;k<6;k++){ pockets.push({x:W*(0.1+0.8*hash(k*3+1,7)), y:H*(0.18+0.78*hash(k*5+2,11)), r:pitch*(6+10*hash(k,k+1)) }); }
-    heroH=document.querySelector('.herowrap').getBoundingClientRect().bottom+scrollY;
-    blocks=[];
-    for(let j=j0;j<j0+rows;j++)for(let i=i0;i<i0+cols;i++){
-      const x=ox+i*pitch, y=oy+j*pitch, inside = (x+pitch>a.left+0.5 && x<a.left+aw-0.5 && y+pitch>oy0+0.5 && y<oy0+aw-0.5);
-      let ex=(x+pitch/2-fcx)/pitch, ey=(y+pitch/2-fcy)/pitch; if(!stacked && ex>0) ex*=1.35; if(ey<0) ey*=1.25;   // the field is squeezed upward too, so the image's top edge erodes like its sides
-      const rr=Math.hypot(ex,ey), n=noise(i,j), h=hash(i,j), h2=hash(i*7+1,j*3+2);
-      if(rr<R0) continue;                                 // the face itself: untouched
-      const t=Math.max(0,(rr-R0)/R1);
-      // cloud: presence decays smoothly from the face outward, blotchy via noise; the square's boundary plays no part
-      let pres = 1.0 - Math.pow(Math.min(1.4,t),1.15)*0.95 + (n-0.5)*0.75;
-      if(x>tk.left-pitch*2 && x<tk.right+pitch*2 && y>tk.top+scrollY-pitch*2 && y<tk.bottom+scrollY+pitch*2) pres -= 0.7;
-      // page debris, structured rather than uniform:
-      //   drift lines: runs along grid rows/cols where a 1-D noise is high
-      const line = (vnoise(j/7+40, 2)>0.92 && hash(i>>3,j)>0.8 && h<0.45) || (vnoise(2, i/9+90)>0.95 && hash(i,j>>3)>0.85 && h<0.4);
-      //   clusters: smooth noise peaks
-      const clump = n>0.80 && h<0.2;
-      //   pockets
-      let pk=0; for(const q of pockets){ const d=Math.hypot(x-q.x,y-q.y)/q.r; if(d<1) pk=Math.max(pk,(1-d)*(1-d)); }
-      const pocket = h < pk*0.3;
-      //   plus a thin random floor
-      const stray = false;
-      // partial cells along the image's margin (the render's seam phase leaves a strip narrower than one block) are always erased
-      const partial = inside && (x < a.left-0.5 || x+pitch > a.left+aw+0.5 || y < oy0-0.5 || y+pitch > oy0+aw+0.5);
-      if(y>heroH-pitch) continue;
-      const present = !partial && ((0.5*n+0.5*h) < pres || stray); const colored = present && !inside;
-      const gridP = Math.max(0, 1-t/1.2);
-      if(!colored){ if(inside){ if(present) continue; } else if(h2>gridP) continue; }
-      let col, relief;
-      if(colored){
-        const own=colorAt(i,j), ri=Math.floor(hash(i+5,j+9)*N), rj=Math.floor(hash(i+2,j+13)*N), rnd=colorAt(ri,rj);
-        const dbr = 0.6*sm(Math.max(0,Math.min(1,(rr-26)/14)));
-        let c=[0,1,2].map(k=>lerp(own[k],rnd[k],dbr));
-        const fade = Math.min(0.9, 0.9*sm(Math.max(0,Math.min(1,(rr-24)/RCOLOR))));   // no drain until past the image's own reach (~22 blocks), so inside and outside match
-        const f2 = (stray && t>1) ? 0.45+0.3*h : fade;
-        col=c.map((v,k)=>lerp(v,BG[k],f2)); relief=1-f2*0.5;
-      }else{ col=BG; relief= inside ? 0.9*Math.max(0.3,1-t) : 0.9*Math.max(0.25,gridP); }
-      blocks.push({x,y,col,relief,alpha:1,colored,inside,cover: inside});
-    }
-    // render the resting field once; per frame only the blocks near the cursor are redrawn
-    base=document.createElement('canvas'); base.width=cv.width; base.height=cv.height;
-    const bx=base.getContext('2d'); bx.setTransform(dpr,0,0,dpr,0,0);
-    far=document.createElement('canvas'); far.width=cv.width; far.height=cv.height;
-    const fx=far.getContext('2d'); fx.setTransform(dpr,0,0,dpr,0,0);
-    for(const b of blocks){ if(b.y>heroH || b.cover) drawBlock(bx,b,0); else drawBlock(fx,b,0); }
-    composite();
-  }
-  function rr(x,y,s,r){cv.getContext('2d').roundRect(x,y,s,s,r)}
-  function drawBlock(x,b,lift){
-    const s=pitch, [r,g,bl]=b.col;
-    if(b.cover){ // erase a render block: flat page-colored square, a hair larger than the pitch, no shading
-      x.globalAlpha=1; x.fillStyle=`rgb(${r},${g},${bl})`; x.fillRect(b.x-1,b.y-1,s+2,s+2);
-      // faint emboss so the erased cell still reads as part of the grid
-      x.fillStyle=`rgba(0,0,0,${0.05*b.relief})`; x.fillRect(b.x,b.y+s-1,s,1); x.fillStyle=`rgba(255,255,255,${0.05*b.relief})`; x.fillRect(b.x,b.y,s,1);
-      return;
-    }
-    const seam=Math.max(1,pitch*0.08), rad=pitch*0.16;
-    const grow=lift*pitch*0.2, size=s-seam+grow, px=b.x-grow/2, py=b.y-grow/2;
-    const k=1+lift*0.2;
-    x.globalAlpha=b.alpha;
-    if(b.colored){ x.fillStyle=`rgb(${r*0.90|0},${g*0.90|0},${bl*0.90|0})`; x.fillRect(b.x-grow/2-0.5,b.y-grow/2-0.5,s+grow+1,s+grow+1); }
-    x.fillStyle=`rgb(${r*k|0},${g*k|0},${bl*k|0})`; x.beginPath(); x.roundRect(px,py,size,size,rad); x.fill();
-    const gr=x.createLinearGradient(px,py,px,py+size);
-    gr.addColorStop(0,`rgba(255,255,255,${0.07*b.relief})`); gr.addColorStop(.45,'rgba(255,255,255,0)'); gr.addColorStop(1,`rgba(0,0,0,${0.09*b.relief})`);
-    x.fillStyle=gr; x.beginPath(); x.roundRect(px,py,size,size,rad); x.fill();
-    x.globalAlpha=1;
-  }
-  // parallax: the cloud around the portrait and the portrait itself shift with the pointer at different rates, eased
-  let px=0, py=0, tx=0, ty=0, heroH=0;
-  function composite(){
-    const x=cv.getContext('2d'); x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,cv.width,cv.height);
-    if(reduce){ x.drawImage(base,0,0); x.drawImage(far,0,0); return; }
-    const hb=Math.round(heroH*dpr);
-    // near layer: page debris stays put; the hero's cover tiles move with the image (same offset), so no edge can show
-    x.drawImage(base,0,hb,cv.width,cv.height-hb,0,hb,cv.width,cv.height-hb);
-    x.drawImage(base,0,0,cv.width,hb,Math.round(px*0.5*dpr),Math.round(py*0.5*dpr),cv.width,hb);
-    // far layer: the cloud outside the portrait, moving more, so it reads as floating in front
-    x.drawImage(far,0,0,cv.width,hb,Math.round(px*dpr),Math.round(py*dpr),cv.width,hb);
-    x.setTransform(dpr,0,0,dpr,0,0); const R=170;
-    for(const b of blocks){ if(b.y>heroH) break; if(b.cover) continue; const md=Math.hypot(b.x+px+pitch/2-mouse.x,b.y+py+pitch/2-mouse.y); if(md<R){ x.save(); x.translate(px,py); drawBlock(x,b,1-md/R); x.restore(); } }
-  }
-  function tick(){ px+=(tx-px)*0.08; py+=(ty-py)*0.08; composite(); if(Math.abs(tx-px)>0.05||Math.abs(ty-py)>0.05||mouseNear) requestAnimationFrame(tick); else ticking=false; }
-  let ticking=false, mouseNear=false;
-  function kick(){ if(!ticking){ ticking=true; requestAnimationFrame(tick);} }
-  function start(){ build(); }
-  if(img.complete&&img.naturalWidth) start(); else img.addEventListener('load',start);
-  let rt=null; addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(build,150)});
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',build);
-  addEventListener('pointermove',e=>{ mouse={x:e.clientX,y:e.clientY+scrollY};
-    tx=0; ty=0; mouseNear = e.clientY+scrollY < heroH+200; kick(); },{passive:true});
-  addEventListener('pointerleave',()=>{tx=0;ty=0;mouseNear=false;kick()});
-  addEventListener('scroll',()=>{ if(scrollY>heroH) mouseNear=false; },{passive:true});
-})();
+// phone headline: shrink to fit one line
+(function(){const h=document.querySelector('.talk h1'); if(!h) return;
+  function fit(){ if(innerWidth>860){h.style.fontSize='';return;} let fs=34; h.style.fontSize=fs+'px'; const max=document.querySelector('.hero').clientWidth-(innerWidth<=860?72+14:0); while(h.scrollWidth>max && fs>18){fs-=1; h.style.fontSize=fs+'px';} }
+  fit(); addEventListener('resize',fit); document.fonts&&document.fonts.ready.then(fit); })();
+// marquee
 // hero button: open the floating ElevenLabs widget (click its launcher inside the shadow root)
 document.getElementById('openAgent').addEventListener('click',()=>{
   const w=document.querySelector('elevenlabs-convai'); if(!w) return;
