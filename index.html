@@ -59,22 +59,13 @@ h1,h2,h3{text-wrap:balance}
 .talk h1{margin:0 0 10px;font-size:clamp(34px,5vw,60px);font-weight:800;letter-spacing:-.03em;line-height:1.02}
 .talk h1 em{font-style:normal;color:var(--muted);font-weight:600}
 .talk .lede{margin:0 0 22px;font-size:17px;line-height:1.5;color:var(--muted);max-width:52ch}
-.agent{display:flex;flex-direction:column;gap:14px;padding:18px 20px 16px;border-radius:20px;background:var(--panel);box-shadow:var(--card-shadow);max-width:640px}
-.agent-head{display:flex;flex-direction:column;gap:10px}
-.widget{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:16px;border-radius:14px;background:var(--panel-2);padding:12px 12px 12px 16px;min-height:72px}
-.widget .lead{display:flex;flex-direction:column;gap:3px;min-width:0}
-.widget .lead b{font-size:15px;font-weight:600}
-.widget .lead span{font-size:12.5px;color:var(--muted)}
-/* the widget anchors its UI to the bottom-right of its host box; give the host a fixed footprint so it sits inline */
-.widget elevenlabs-convai{position:relative;display:block;width:160px;height:48px;flex:0 0 auto}
-@media (max-width:480px){.widget{flex-direction:column;align-items:flex-start}.widget elevenlabs-convai{width:100%}}
+/* the ElevenLabs widget sits in the open, full width, with only a status line above it */
+.agent{display:flex;flex-direction:column;gap:12px;max-width:640px}
+.agent elevenlabs-convai{position:relative;display:block;width:400px;max-width:100%;min-height:150px;margin-left:-32px}   /* the widget pads itself 32px and right-aligns; a box its own width puts it flush left */
 .fine{margin:0;font-size:12px;line-height:1.4;color:var(--muted)}
 .call{display:inline-flex;align-items:center;gap:10px;font:inherit;font-weight:600;font-size:15px;padding:14px 20px;border-radius:999px;border:0;background:var(--fg);color:var(--bg);cursor:pointer;white-space:nowrap}
 .call:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .call .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
-.bars{display:flex;align-items:center;gap:4px;height:44px;min-width:0}
-.bars i{display:block;width:4px;height:8px;border-radius:2px;background:var(--fg);opacity:.75;animation:bar 1.6s ease-in-out infinite}
-@keyframes bar{0%,100%{height:8px}50%{height:var(--h,28px)}}
 .agent .status{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .agent .status b{color:var(--fg);font-weight:600}
 
@@ -154,15 +145,8 @@ h1,h2,h3{text-wrap:balance}
     <h1>Hi, I'm Chris. <em>Or close enough.</em></h1>
     <p class="lede">I build products at the intersection of media, audio, and AI. The voice below is a clone of mine. Ask it anything about what I've shipped, what I'm building, or why Nashville.</p>
     <div class="agent" aria-label="Voice agent">
-      <div class="agent-head">
-        <div class="bars" id="bars" aria-hidden="true"></div>
-        <div class="status"><span>Voice <b>Chris, cloned</b></span><span>Runs on <b>ElevenLabs</b></span><span>Knows <b>this site</b></span></div>
-      </div>
-      <div class="widget">
-        <div class="lead"><b>Talk to Chris</b><span>Tap the phone to start a call, or the bubble to type.</span></div>
-        <elevenlabs-convai agent-id="agent_3001m5ka8b2mecrrg64axxz9fp3x" variant="expanded" action-text="Ask me anything" start-call-text="Talk to Chris" end-call-text="Hang up" expand-text="Open" listening-text="Listening…" speaking-text="Chris is talking…"></elevenlabs-convai>
-      </div>
-      <p class="fine">Uses your microphone. The conversation isn't stored anywhere I can see it.</p>
+      <div class="status"><span>Voice <b>Chris, cloned</b></span><span>Runs on <b>ElevenLabs</b></span><span>Knows <b>this site</b></span></div>
+      <elevenlabs-convai agent-id="agent_3001m5ka8b2mecrrg64axxz9fp3x"></elevenlabs-convai>
     </div>
   </div>
 </section>
@@ -348,8 +332,6 @@ const rail=document.getElementById('rail'); rail.innerHTML+=rail.innerHTML;
   addEventListener('pointerleave',()=>{tx=0;ty=0;mouseNear=false;kick()});
   addEventListener('scroll',()=>{ if(scrollY>heroH) mouseNear=false; },{passive:true});
 })();
-// waveform bars
-const bars=document.getElementById('bars'); for(let i=0;i<28;i++){const s=document.createElement('i');s.style.setProperty('--h',(10+Math.abs(Math.sin(i*0.7))*30)+'px');s.style.animationDelay=(i*0.07)+'s';bars.appendChild(s)}
 // card glare + play only on screen
 document.querySelectorAll('.card').forEach(c=>c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect();const g=c.querySelector('.glare');g.style.left=(e.clientX-r.left)+'px';g.style.top=(e.clientY-r.top)+'px'}));
 if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(x=>{const v=x.target;x.isIntersecting?v.play().catch(()=>{}):v.pause()}),{threshold:.15});document.querySelectorAll('video').forEach(v=>io.observe(v));}
