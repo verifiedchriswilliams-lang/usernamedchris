@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>UserNamedChris</title>
+<meta name="description" content="Chris Williams builds products at the intersection of media, audio, and AI. relaxed.app, Trending in Real Time, The Prob, and more.">
+<meta property="og:title" content="UserNamedChris">
+<meta property="og:description" content="Products at the intersection of media, audio, and AI. Talk to the clone.">
+<meta property="og:image" content="https://usernamedchris.com/media/avatar.jpg">
+<meta property="og:url" content="https://usernamedchris.com/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="media/avatar.jpg">
+<style>html{color-scheme:light dark}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist+Mono:wght@400;600&display=swap">
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+<style>
+/* Layout: marquee nav; a hero that IS the voice agent (avatar + talk UI); a 4-card video grid; a full-width "station" band; a plain link row. */
+:root{
+  --bg:#F5F1EC; --fg:#17161A; --muted:#6E6A66; --line:rgba(23,22,26,.09); --panel:#FFFFFF; --panel-2:#ECE7E0;
+  --accent:#1EE58A; --ink-on-dark:#F2EEE8; --dark:#141210;
+  --card-shadow:0 10px 30px rgba(40,30,20,.12), 0 2px 6px rgba(40,30,20,.06);
+  --card-shadow-hover:0 24px 60px rgba(40,30,20,.20), 0 4px 10px rgba(40,30,20,.08);
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"Geist Mono","SF Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#141210; --fg:#F2EEE8; --muted:#9A948C; --line:rgba(242,238,232,.10); --panel:#1D1A17; --panel-2:#272320; --card-shadow:0 10px 30px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3); --card-shadow-hover:0 24px 60px rgba(0,0,0,.6), 0 4px 10px rgba(0,0,0,.35); color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#141210; --fg:#F2EEE8; --muted:#9A948C; --line:rgba(242,238,232,.10); --panel:#1D1A17; --panel-2:#272320; --card-shadow:0 10px 30px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3); --card-shadow-hover:0 24px 60px rgba(0,0,0,.6), 0 4px 10px rgba(0,0,0,.35); color-scheme:dark }
+
+*{box-sizing:border-box}
+body{margin:0;position:relative;isolation:isolate;background:var(--bg);color:var(--fg);font-family:var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1260px;margin:0 auto;position:relative}
+h1,h2,h3{text-wrap:balance}
+
+/* top bar */
+.top{position:sticky;z-index:5;top:env(safe-area-inset-top,0px);z-index:5;display:flex;align-items:center;height:36px;background:var(--bg);margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px))) 0 calc(-1 * max(16px,env(safe-area-inset-right,0px)));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wordmark{font-weight:700;font-size:13px;letter-spacing:.04em;white-space:nowrap;padding-right:14px;background:var(--bg);position:relative;z-index:2}
+.wordmark:after{content:"";position:absolute;right:-18px;top:0;bottom:0;width:18px;background:linear-gradient(90deg,var(--bg),transparent)}
+.marquee{flex:1;overflow:hidden;min-width:0;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}
+.rail{display:flex;width:max-content;animation:rail 60s linear infinite}
+.rail a{font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:0 18px;line-height:36px;opacity:.9}
+.rail a:hover{opacity:1;text-decoration:underline;text-underline-offset:4px}
+.rail i{line-height:36px;opacity:.5;font-style:normal}
+@keyframes rail{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.rail{animation:none}.bars i{animation:none !important}}
+
+/* ===== hero: the voice agent, growing out of a voxel field ===== */
+.herowrap{position:static;overflow:visible;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px))) 0 calc(-1 * max(16px,env(safe-area-inset-right,0px)));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#field{position:absolute;left:0;top:0;width:100%;display:block;pointer-events:none;z-index:0}
+.top{z-index:10}
+.hero{position:relative;display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:56px;align-items:center;padding:72px 0 84px;max-width:1260px;margin:0 auto}
+@media (max-width:860px){.hero{grid-template-columns:1fr;gap:40px;padding-top:36px;padding-bottom:40px}}
+.avatar{position:relative;z-index:-1;aspect-ratio:1;max-width:100%;overflow:hidden;background:var(--panel-2)}
+.avatar img{display:block;width:100%;height:100%;object-fit:cover;will-change:transform}
+.talk,.label,.grid,.station,.links,.foot{position:relative;z-index:1}
+
+.talk h1{margin:0 0 10px;font-size:clamp(34px,5vw,60px);font-weight:800;letter-spacing:-.03em;line-height:1.02}
+.talk h1 em{font-style:normal;color:var(--muted);font-weight:600}
+.talk .lede{margin:0 0 22px;font-size:17px;line-height:1.5;color:var(--muted);max-width:52ch}
+.agent{display:flex;flex-direction:column;gap:14px;padding:18px 20px 16px;border-radius:20px;background:var(--panel);box-shadow:var(--card-shadow);max-width:640px}
+.agent-head{display:flex;flex-direction:column;gap:10px}
+.widget{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:16px;border-radius:14px;background:var(--panel-2);padding:12px 12px 12px 16px;min-height:72px}
+.widget .lead{display:flex;flex-direction:column;gap:3px;min-width:0}
+.widget .lead b{font-size:15px;font-weight:600}
+.widget .lead span{font-size:12.5px;color:var(--muted)}
+/* the widget anchors its UI to the bottom-right of its host box; give the host a fixed footprint so it sits inline */
+.widget elevenlabs-convai{position:relative;display:block;width:160px;height:48px;flex:0 0 auto}
+@media (max-width:480px){.widget{flex-direction:column;align-items:flex-start}.widget elevenlabs-convai{width:100%}}
+.fine{margin:0;font-size:12px;line-height:1.4;color:var(--muted)}
+.call{display:inline-flex;align-items:center;gap:10px;font:inherit;font-weight:600;font-size:15px;padding:14px 20px;border-radius:999px;border:0;background:var(--fg);color:var(--bg);cursor:pointer;white-space:nowrap}
+.call:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.call .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.bars{display:flex;align-items:center;gap:4px;height:44px;min-width:0}
+.bars i{display:block;width:4px;height:8px;border-radius:2px;background:var(--fg);opacity:.75;animation:bar 1.6s ease-in-out infinite}
+@keyframes bar{0%,100%{height:8px}50%{height:var(--h,28px)}}
+.agent .status{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.agent .status b{color:var(--fg);font-weight:600}
+
+/* ===== section label ===== */
+.label{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:44px 0 16px;padding-top:18px;border-top:1px solid var(--line)}
+.label h2{margin:0;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.label span{font-size:13px;color:var(--muted)}
+
+/* ===== card grid ===== */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+@media (max-width:560px){.grid{grid-template-columns:1fr;gap:18px}}
+.card{position:relative;display:block;aspect-ratio:3/4;max-width:100%;border-radius:22px;overflow:hidden;background:#111;
+  box-shadow:var(--card-shadow);transform:translateY(0);transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s cubic-bezier(.22,1,.36,1);isolation:isolate}
+.card:hover,.card:focus-visible{transform:translateY(-6px);box-shadow:var(--card-shadow-hover)}
+.card:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.card video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.card .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(0,0,0,.58) 100%);pointer-events:none}
+.card .glare{position:absolute;width:460px;height:460px;border-radius:50%;left:0;top:0;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(255,255,255,.16),transparent 70%);opacity:0;transition:opacity .4s;pointer-events:none;mix-blend-mode:screen}
+.card:hover .glare{opacity:1}
+.meta{position:absolute;left:0;right:0;bottom:0;padding:22px 26px 24px;color:#fff}
+.meta h3{margin:0 0 6px;font-size:24px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+.meta p{margin:0 0 10px;font-size:15px;line-height:1.4;opacity:.92;max-width:40ch}
+.meta .cta{font-size:12.5px;font-weight:500;opacity:.85}
+.card:hover .cta{opacity:1;text-decoration:underline;text-underline-offset:4px}
+.card[data-tone="light"] .shade{background:linear-gradient(180deg,rgba(247,246,242,0) 45%,rgba(247,246,242,.92) 100%)}
+.card[data-tone="light"] .meta{color:#17181A}
+.card[data-tone="light"] .glare{background:radial-gradient(closest-side,rgba(255,255,255,.5),transparent 70%)}
+
+/* ===== the station band ===== */
+.station{position:relative;overflow:hidden;border-radius:24px;background:var(--dark);color:var(--ink-on-dark);padding:28px 28px 26px;display:grid;grid-template-columns:1fr auto;gap:20px 32px;align-items:end;box-shadow:var(--card-shadow)}
+@media (max-width:760px){.station{grid-template-columns:1fr}}
+.station .freq{font-family:var(--mono);font-size:clamp(44px,8vw,96px);font-weight:600;letter-spacing:-.04em;line-height:1;color:#fff}
+.station .freq small{font-size:.32em;letter-spacing:.1em;margin-left:12px;color:var(--accent)}
+.station .what{margin:10px 0 0;font-size:15px;line-height:1.5;color:rgba(242,238,232,.75);max-width:56ch}
+.station .dial{position:relative;height:54px;grid-column:1/-1;overflow:hidden;border-top:1px solid rgba(255,255,255,.12);margin-top:6px}
+.station .ticks{position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.35) 0 1px,transparent 1px 12px),repeating-linear-gradient(90deg,rgba(255,255,255,.7) 0 1px,transparent 1px 60px);background-size:100% 14px,100% 24px;background-repeat:repeat-x;background-position:0 100%,0 100%;animation:dial 30s linear infinite}
+@keyframes dial{to{background-position:-600px 100%,-600px 100%}}
+.station .needle{position:absolute;left:38%;top:0;bottom:0;width:2px;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.station .now{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(242,238,232,.7);white-space:nowrap;display:flex;gap:10px;align-items:center}
+.station .now b{color:var(--accent);font-weight:600}
+.station .now i{width:8px;height:8px;border-radius:50%;background:#F0476A;box-shadow:0 0 10px #F0476A;font-style:normal;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+.station .cta{display:inline-block;margin-top:14px;font-size:13px;font-weight:500;color:#fff;border-bottom:1px solid rgba(255,255,255,.35);padding-bottom:2px}
+
+/* ===== links ===== */
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.links a{display:flex;flex-direction:column;gap:4px;padding:16px 18px;border-radius:16px;background:var(--panel);box-shadow:var(--card-shadow);transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.links a:hover{transform:translateY(-3px)}
+.links b{font-size:15px;font-weight:600}
+.links span{font-size:13px;color:var(--muted);line-height:1.4}
+.links em{font-style:normal;font-size:12px;margin-top:4px;color:var(--fg)}
+
+.foot{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;font-size:12.5px;color:var(--muted)}
+.foot b{color:var(--fg);font-weight:600}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <a class="wordmark" href="#">USERNAMEDCHRIS.COM</a>
+  <nav class="marquee" aria-label="Site links">
+    <div class="rail" id="rail">
+      <a href="#about">About</a><a href="#writing">Substack</a><a href="https://github.com/usernamedchris">GitHub</a><a href="https://x.com/usernamedchris">X</a><a href="https://instagram.com/usernamedchris">Instagram</a><a href="https://youtube.com/@usernamedchris">YouTube</a><a href="https://tiktok.com/@usernamedchris">TikTok</a><a href="https://threads.net/@usernamedchris">Threads</a><a href="https://linkedin.com/in/usernamedchris">LinkedIn</a><i>•</i>
+    </div>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- HERO: the voice agent -->
+</div>
+<div class="herowrap">
+<section class="hero" id="about">
+  <div class="avatar" id="avatar"><img src="media/avatar.jpg" id="avatarImg" alt="Voxel portrait of Chris Williams" width="900" height="900"></div>
+
+  <div class="talk">
+    <h1>Hi, I'm Chris. <em>Or close enough.</em></h1>
+    <p class="lede">I build products at the intersection of media, audio, and AI. The voice below is a clone of mine. Ask it anything about what I've shipped, what I'm building, or why Nashville.</p>
+    <div class="agent" aria-label="Voice agent">
+      <div class="agent-head">
+        <div class="bars" id="bars" aria-hidden="true"></div>
+        <div class="status"><span>Voice <b>Chris, cloned</b></span><span>Runs on <b>ElevenLabs</b></span><span>Knows <b>this site</b></span></div>
+      </div>
+      <div class="widget">
+        <div class="lead"><b>Talk to Chris</b><span>Tap the phone to start a call, or the bubble to type.</span></div>
+        <elevenlabs-convai agent-id="agent_3001m5ka8b2mecrrg64axxz9fp3x" variant="expanded" action-text="Ask me anything" start-call-text="Talk to Chris" end-call-text="Hang up" expand-text="Open" listening-text="Listening…" speaking-text="Chris is talking…"></elevenlabs-convai>
+      </div>
+      <p class="fine">Uses your microphone. The conversation isn't stored anywhere I can see it.</p>
+    </div>
+  </div>
+</section>
+</div>
+<div class="wrap">
+
+<!-- CARDS -->
+<div class="label"><h2>Things I've built</h2><span>Four live products. Each one is a real thing you can use today.</span></div>
+<main class="grid" id="grid">
+  <a class="card" href="https://relaxed.app" data-tone="dark">
+    <video src="media/relaxed.mp4" poster="media/relaxed-poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <div class="shade"></div><div class="glare"></div>
+    <div class="meta"><h3>relaxed.app</h3><p>A guided session written for you, on the spot. The way out is in.</p><span class="cta">Try a session →</span></div>
+  </a>
+  <a class="card" href="https://trendinginrealtime.com" data-tone="light">
+    <video src="media/trending.mp4" poster="media/trending-poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <div class="shade"></div><div class="glare"></div>
+    <div class="meta"><h3>Trending in Real Time</h3><p>Twenty-five outlets, one ranked view of the day.</p><span class="cta">See what's trending →</span></div>
+  </a>
+  <a class="card" href="https://thereisnoantimemeticsdivision.com" data-tone="dark">
+    <video src="media/antimemetics.mp4" poster="media/antimemetics-poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <div class="shade"></div><div class="glare"></div>
+    <div class="meta"><h3>There Is No Antimemetics Division</h3><p>An interactive archive for a story you won't remember reading.</p><span class="cta">Enter the archive →</span></div>
+  </a>
+  <a class="card" href="https://theprob.ai" data-tone="dark">
+    <video src="media/theprob.mp4" poster="media/theprob-poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <div class="shade"></div><div class="glare"></div>
+    <div class="meta"><h3>The Prob</h3><p>What the crowd is betting on, out of market-speak. Daily.</p><span class="cta">Read today's brief →</span></div>
+  </a>
+</main>
+
+<!-- THE STATION -->
+<div class="label"><h2>On air</h2><span>In progress</span></div>
+<section class="station" id="station" aria-label="The Station">
+  <div>
+    <div class="freq">101.5<small>FM · UNC</small></div>
+    <p class="what">The Station is an AI radio station built from the ground up: AI hosts, a crowd-steered playlist, and a signal that never goes off air. Still under construction. Listen in while it's being built.</p>
+    <a class="cta" href="#station">Tune in →</a>
+  </div>
+  <div class="now"><i></i><span>Now playing</span><b>Test signal</b></div>
+  <div class="dial"><div class="ticks"></div><div class="needle"></div></div>
+</section>
+
+<!-- LINKS -->
+<div class="label"><h2>Elsewhere</h2><span>The rest of the work, and where to find me.</span></div>
+<section class="links" id="writing">
+  <a href="#job-scanner"><b>Job Scanner</b><span>Agents that read every senior posting so I don't have to, and tell me which ones are real.</span><em>How it works →</em></a>
+  <a href="https://github.com/usernamedchris"><b>GitHub</b><span>The code behind most of this, including the agents.</span><em>github.com/usernamedchris →</em></a>
+  <a href="https://substack.com/@usernamedchris"><b>Essays</b><span>The Myth of the Continuous Self, and other questions I can't put down. Chris was here.</span><em>Read on Substack →</em></a>
+  <a href="https://linkedin.com/in/usernamedchris"><b>Résumé</b><span>iHeartMedia, The Daily Wire, and what came after.</span><em>LinkedIn →</em></a>
+</section>
+
+<footer class="foot">
+  <span><b>Chris Williams</b> · Nashville, TN</span>
+  <span>UserNamedChris, everywhere</span>
+  <span>hello@usernamedchris.com</span>
+</footer>
+</div>
+
+<canvas id="field" aria-hidden="true"></canvas>
+<script>
+// marquee
+const rail=document.getElementById('rail'); rail.innerHTML+=rail.innerHTML;
+// ===== voxel field: the portrait stays whole; color explodes out of it onto a grid that runs under the page =====
+(function(){
+  const cv=document.getElementById('field'), img=document.getElementById('avatarImg'), av=document.getElementById('avatar');
+  const N=45;                      // blocks across the portrait
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // the portrait's own 45x45 block colors, baked in so the field uses its real palette
+  const HEX='002ce4002adf002be30029e30028e90222f10f1cf41e18f63013f8410ff6500bf66506f37403ef8702ee9801e6a301daac01c5be01bcce02b3d703a7dd039ce40796e80e85ee167cf11f71f32764f42f5cf63c55f7484bf95845fb6644fb6e3dfc7739fc8535fd9131fc9f2efcad29fcb925fdc421fdcf1efcd019fcd818fdde19fce417fcea1a0030e5002fe4002ee4002ce7002beb0426f1131ff4271bf63a15f74c0ff66009f57507f08905f19903eaa802e2b301d6b701bfc702b5d502afda04a4df0699e50c8ade1e6bec1878ee1e70f12867f22f5ff43b56f5464cf75247fa6546fb6d3ffd7a3bfc8338fc8f33fc9c2ffcaa2afcb625fcc021fcca1cfccb17fcd117fcd617fcdd17fce419002ad2002acf0029d40028d40025db081edf1719e32916e53e10e6500be46306e27803df8d02dd9b02d6a901ccb201c0b401a8c201a2b40b789927429a3e215c1d11431907792d0fae4614ea3354e92456ec304ff03946f44744f85740fa613afa6a35fb7432fb7e2dfb8928fc9725fca420fcb11bfcb818fcbb13fcc212fcc711fcce11fcd513002ad20029d20029d30026d50120db111bdf2017e33310e54a0be56207e47304e18904de9902d6a802cfb301c1b802b3b8565ddd91657d3d1c5d2b14441a0958230e62270c5a2a0f5f250ec25e1f963815da3f31ed3d42f13f45f74f43f8573afa6136fa6c33fb792ffb812afc8f24fc9c20fcaa1bfdb317fcb512fcbc11fcc111fcc711fccf110029cf0029d10027d10027d70620de1518de2916e23c0fe4560ae37206e28003dd9803daa802d3b301c8ad08a1733a1e5d2a13753a1c72381ab768384d200e3715085a250fc162293a15075f2710e7833a6f2c0da94513ee463bf64546f74f3ef8583af96234fa6f31fb7a2cfb8826fc9421fca11cfcaa17fcab11fcb410fcb90efcbf0efcc60f002ad50028d00027d60024da091dde1b17e23012e6490de66205e37b03e08f02dea401d6af01cbac149a783b1f5829153a1a0c290f0568331aac5f3477391b2a1006371609b55d2b51210b6b301392441ebb6225793110df6220f13d48f64444f84d3bf95a37fa6532fa702dfb7d28fc8b23fc981dfc9f17fba211fcab0ffcb10ffcb70dfcbe0c0029d10028d20024d20122dc0f1be02417e33a0fe4530be56e05e38603de9e02ddaf02d2bf01cd861066401e0fba937b744b386b351d291006431d0ba85c33592914200b04b05f3395481f6a2f153a170ace7234893e159c4314722f0ef53a45f84a41f8523afa6037fa6a30fb772bfc8425fc8f1ffc9a18fb9d13fca410fcac0ffcb00cfcb70b0029d20026ce0025d5021fd81518e02b13e2430ee65d09e37904e28f02dca401d4b801d0b3139e5e2f195a3b2b5c3a2ac89a80814f35512814241007622e16723a1d34170b592710ad613157260f55261293471e703212ae501ad26b21c44f1bf63e43f94b3ffa5439fa6233fb6e2bfc7926fc871ffc8f18fc9311fc9a0dfca30efca50bfcb00b0027ce0026d10024d4081cdc1b16e03111e2490ae46607e38003df9902d8af01d5bb01c986106b68361e5d35219f735d744f3dbc8e765029165e2f1935160a8143244b2212291007a056296932183b190c723417632c11853912934113713111e95330f73f43f9493cfa5634fb652dfc7227fc7f22fc871afb8712fb930efc9b0dfca00afca6090026cf0024ce0021d80b19dd1f16e2350fe2510ae66d04e08902e09f01d7b601d4c201c875293a39190b2610071e0c04946650d4a88e6e4837753f23411f116230185328152b1209642d135f2f18291108612d1553230fa352236f2d0abc6123682709f6483cf74041f84d38fa5c30fb6929fb7423fc7d1cfb8116fb8c12fb930ffb970dfba00b0026d10024d3001edb1017df2311e23d0de75706e47704e59002e0a701d9bd01d4c800c85a1635592d194d26147047347c523e7c4e39b6876e7a4227391a0d51251249211136170b5225115526113416095e2a13461d0c994519702e0fa04d20954216b34d14f83a45f8463cfa5433fb622cfb6d25fb761dfb7b17fb8412fb8c0ffb920bfb9b0a0027d30024d3021edb1617e22911e3400ce56007e67e03e39a02e3b001dbc401d4ce01c8781e4631160a4c25132e1409562916a05e3f975637ba6d44a050285d260e86401d682f16662d12b5683975381b8a3e1aab4b1df08936d770283b1708753616883b11e83b3ef93f43fa4d38fb5c31fc6629fb7022fa7419fb7f16fc8811fb8d0dfb940b0025d20022d0031dde1614e02c0fe54609e66806e98402e2a002e0b401d9c901d3d601cc51291a32180d1d0c06301409c0501bd65c21d96224ec7731f3863fdb6d2eeb8b49f0a061e8b382fcc289eca365f6b774fcb96cfcb65afca33e9f491d4b1d0aaa4e18d84032f83849f9453dfa5535fb5e2bfb6824fa6d1cfb7717fb7e12fc860ffb8d0c0024d10020d2051adc1b14e2310ee64808e76b04e48a02e3a302e0ba01d7cc01d2a60e8d411b1829130a30160b8a4420d35c20e66826f47b33fa9348fc9f56fcb06cfcbd7ffdcb96fdd5a8fdd8aefcdeb7fdd7a4fdc67bfcb65cfca744de74327236197e3611dc3f35f72f50f93d43fa4b37fb5a2efb6226fa651dfa6f17fb7a15fb7e10fb880d0024d1001fd50a19de1d12e3320ee64c08e76c05e98c03e2a602dfbc01d6cf02d1d802c8371c104e2818573527b56034d35b20e76725ef752ffa934afb9a51fca964fcb676fcbd80fdc58bfdca93fdcf9afdc88afcc177fcb257fca33eeba056743f25782f0df41c65f62757f73447f9443bfa5032fa5a29fa601ffa691afa6f16fb7511fb800d001fce001bd30b13df1d0ee33308e74e03e96a02e88c01e8a600dfbc00d8cf00d3d901c9791a4e331b1190644fb3643cda6023e86a28f37e37fc9e54fb9853fb9954fcb06ffcb87afdbd81fdc186fdc58afcbf7efcb064fcac53fc9f3ed58841bc825da92f29f2126ef61d5df72a4ef8373ff94334fa502cf9541efa5e1afa6817fa6d12fb780d001fd1001bd70a11e01e0ee63309e94b03e96a03ed8601e7a000e4bb00dbcc01d3dd00d1a31083462b1f5f3d2fc36839db6023ef702bf27a34fc9c53fcb472fcc894fcae6dfcb678fdbc7efdbf81fdc68cfdc88afcba6ffcae56fca543d3823b9e5f3cc72842f41075f51867f62355f72f47f93d3af9442ff84c23f9581ffa6219fa6816fb7312001fd30019da0b13e7200dec3608ef4d04f06c01ef8c01eda401eabe01e3d201dddc01d3c40cab442a20533429d1703bdc6224fa883efa9a51f78a44fb9b57fcbb80fcb77afcb77afca261fcba7dfdd19ffcc68bfdc17afcb764fc9f40fa9a46844121dd3052f30d80f6146ef6205ef82c51f93642fa4238f9472af95322fa5c1ffa6519fb6e150022dc001de00b13ec200ef13609f45004f46b02f58d02f3aa01efc001e7d301e4dd03d9d8359542281e975e41da7840e87b38fca25bfbaf6dfa9f5bf8843ffb9651fa9652fd9f5bfb904dfcb06efdb471fdbc7afdc786fdc97ffcbb5ffba54a853e1ceb3276f3098bf8107cf91a67fa265afb324bfa3c3ef9422ffa4f26fa5822fa5e1dfb6b180020e2001be90c14f4210df5360af95105fa6a03f98c02f8a701f6bb00f1cd01edf06f7ccc541f91421f9d6040d47540b9643abb6538a75c37b77043ca7743e47335f8823efcb87bf67c3af28f4bd38c58c87e4fc46f41ea8950fba75bfcb253a95523f18a39f65985f70c86f91573fa1e61fb2b53fb3746f93d35f94a2cfa5226fa5a21fb641c0022e3001ee90b13f31f0ef8330bfb4b05fb6a03fc8902fba101f9b800f6c700f4f37060cd4b18b95627cb845aae623ad66a2e713215210d0543281e6b240b72290be77838fcc790d46f377b2a0c5f2b182519166f3c27ce7337f89546fcb656c9622aed591bf9727bf60a8df81179fa1b68fa2559fa2f4cf9373af94331fa4d2bfa5424fb5f1f0024e8001fea0416f51b10f82e0bfb4806fb6204fb8202fb9b01fbae00fabe00f8e65b7de4672aac441ac87c51d1682d8d3b16ba4f31b7644fc4715db24932b55626dc6c35fcbd86cd7a41bf5630c56650b5664de78a71d56c38e78035fcb556c76229fc9446f45a80f30794f60d82f91773fa2162fa2b52f73141f93b36f94730fa4e29fb59240023e60020eb0418f51712fa2b0efc4208fc5e04fc7a01fb9302fca801fbb701fbc302f9e46629892a0cd0865aee813def823dc95e27c05322d06935e57f46c65525e26835fcb580fc9c54ea965cc05526d25c23ee7e3bfcb064fcbb69fcb858d25c22fca952ec02a3f1059af50c89f8117efa1a6cfa235bf72848f8353ef93e36f9482ffb51270023e50020e90017f31212f9230efb3a09fc5105fd6f03fb8702fc9901fbaa02fcb402f8ef7837a93e14c8784ee67f3ffbab66fcb270fb9551fb9253f1793eca5123eb6d3afcac77fc9b57fcae6cfdba7cfca968fcb673fdcc8dfcc372fcab4bf18238fcba63e602a5ec039cf1078ef40b80f91473fa1d64f6214ff72b44f8363cf83d30fa482b0023e5001fe70019f40f13f9200dfb360afc4a05fc6403fc7a01fb8e02fc9901faa601fadc5f8dd76125cb825bd56c32f38843fba35ffcb476fc9659e1612ecf5327f98855fcb280fca76afb9453fcb97efdc68dfdce98fcc986fcb25af99f41f58a3be9598ae201ade802a1ec0393f00888f60d7af8146bf51857f5214cf62a43f93538f93f300025e60020e9001bf40e14f91d11fb310bfc4407fd5904fc6f02fc8201fc9101fc9c02fab62acaea7433be6c44d26b33ec7632fa934cfca868f87d42ce5329db5d30fc9c68fcc295fcaf75f9995bf97d3efca866fcc383fcbf73fca94efa983bfcac54da279dde01b1e401a5e90399ed078ff30a81f50f72f21260f51c54f52349f72b3ff837360026e70022e8001cf20615f81611fb290efc3c0afc4e05fc6203fc7302fc8101fc8b02fb9102fbce5376cc794dcd6933e67331fb9149fb934ef5783bc84f24953819d65f31f3804bbb5a32f79357f58446fb8945fcb26afcb362fca145fbab46ea7774d001c0d801b6e002aae5029ee90593ee0686f20c7bf00e67f3175df51c55f62448f72e3f0028e50024e6001eee021af70f13fa2311fb340bfc4607fc5705fc6603fb7402fc7f03fc8402fc8401fac56c5dc76530db682af27e38e87535f28543cc6432a552298a3f1ea84e26ec955bfcb174fcb577ef8747f89248fca855fc983df39945bb01cec902c4d202b6da02addf03a2e60397ea068cee0880eb0b6eef1064f3165ef51c52f825480028e70024e60020ed001af40917fa1a10fc2a0dfc3a09fc4b06fc5803fc6602fc7002fb7802fc7c02fcae4e92c5632de97f3ad16227e68547cc733fc06c3cc46f3fcb7645df8852f9ae74fab179f6a86df7a363e57533fcaa55fb973eee8d58b301d4be00c4cd01bcd201afd702a6dd029ce40492e50486e60676e90b6cee0f66f01459f41d500029e50027e60024ee001cf20318f91514fb220ffc320cfc4108fc5207fc5d02fd6805fc6d02fb7102fba64796c46530e77c36ed8641984d26974c2ac75a37d95539e76c4df67c5bf57d60f58d66d87d52ab5527faa056fca652fc953ddc6e70a901d7bb01cdc501c0cd02b5d302acd902a5dd049be30593dd0580e30977e80c6fec1065ef155d0028de0026df0023e40021eb011af00c15f51b11f6280cf6360bf64607f75105f75904f66102f76503f76703f5bc6233c35e29ec8440f9964ce87938cd412df65a53f77470f78581fb8d85fb7962fcb06cfcac62fba859f78638f888348e01dfa101d9b001ccba01c1c201b7c801afce01a6d3029ed50393d40383da067bde0973e20b6ae60d620028d90027da0024db0021df001ce80518ee1212f01d0ef02b0df2380af14206f24a04f25203f25903f35c02f1893894bb5e2db55423f5863df88c42e27333bd5526b74e28c4552cf18546fcb169fdbc72fcb163f48137ef8238d1655b8001db8f00d2a101caac01beb501b5bd01b1c402a9c901a0cb0295c80285cf037dd20478d80771db086a0027d50025d20024d80020db001ee0011ce90815ec1610ef230fef2d0bef3707f04107f14605ef4a03f25203ef5402e9ad5225ac5629db7031f2843af68b42ed8440ea8348f79c5ffcaf6bfcbd76fcbb6efaa053f58b41d16e31c562737201db8602d59401ce9e01c0a801b8b001b0b802abbf02a6c4029bbe028bbf027ec6037dcb0475ce046d0026d20024d20024d30022d90021de001ce30218ea0e13ec1910ef230cef2d0bf03509ef3d06ef4307f14903ee200d50cb571d913d17ba602fed8541f68e44fa944dfb9f64fcbb84fdc991fdbe79fcb96ded9350d87b3ef0742ad184386c1c867a01d78401c99601c69e01bda401b3ae01afb101a3b9019fb1008dba0288c10286bf027bc704770025d10025d10024d50022d70021dc001de3021ae90614eb1112ee1d0fef260df02d0af03508f22e0f93131216120d0fd65e1fb6430f8f3c16c46a37de7636f78b44fb9c5bfa9f61fdb571fcaf65faa45bcf7842d65414fa8735fb91353f281a5e2f1c8622878800c59301bf9d01b7a701b3b101b1b001a3ac0194ae018db5028ab80283bc027c0025d10024d00024d50024d70020da001fe10019e50417ed0a13ee1710f0210fe32912b21a1829121014131115462010d35b1ed9601fb64410913b14a05127cc7039de8146e1844ae88e50e1894bbc6431db6120fa913efb923efc973cfcad4e3a241b4023196d341ca541499501bb9f01b8a101adab01aaa40099ab0196ad0191af018bb501870026d20025d10024d20024d60023db0021e0001de5031aea0513ed1a1a6e18173517161c1b191f0d0b0c1412154f2514d1591de26724e06825c54e149b3408833a198c44208e4622924722af4311f07127fa9a48fca751fc9a45fba44bfcab5244271c2417144b2c1e4d2a1a7c3c1aab395aa20ea1a301ae9e01a1a2019aa7019aac0295ae01900026cf0026ce0025d20024d60023d80123de001fe20e1fa618181e1514181a191d110f121514180b0a0b110f12121012863c18da5d1de26824de6421bf4a12ac3c0bad3d0dbb440fe0611ef87b2dfa8a39fc9b46fca24afb943ffca34cc07d3d261a19191111231818241b1b2a1a174d2918793b1da0403f9400a599019f9a019c9e0196a401950026ce0026cc0026d10025d30c24aa16247e201f261b1a2017161a1312151b191e11101318171b131215100e11161417351b13ce571ade6321e76d27e16823c24a12b7420eda5e1cf87f30fa8937fb9240fb9d49fca14bfca14b915b31201718271c1c160f0e241919241b1d2a1d1b36211939231b512c1a6f3619952c5b960a9792009c99019a0029d30028d50028d61926741c1c262824291c1a1f26232912111414131817161b19181c16151a201d230d0b0d131216161417171315df6623e26723ea7129ed772fc04710c3480fec6c25fc9745fc9c48fca04dfba04d8d5731241b1d281d1f1d1514221a1b1f17183525222a1e1c2f1f1935241c372219331e1547291a763c1d9b256d8d05990029dc102bb31d2c721a191f1c1a1e1514181413171c1a1f15141814131715141916151914131714131618161a0d0b0d121113121113241612af4d1cdc6320f68538e96f28cf5115eb6f26fb9541fa9542db853f1f17181c181a1f1a1d1c1718140f0f1b15161b1516271f20201a1b221918251b192d1f1c23181635211c2e1d184626196831191f28591e1d231b1a1f1e1c211a191d17141717151a1c1a201413181312151b191e16151916151a16151a1413161312150b090a111012111013141113602f1ab75e29f98a3de06421df621ffb9544754629291d1a1d191c191517110e0f0f0c0d21191b1712141d16182820221e1819231a19241b1c261b1a2117171f161630201b2c1d1a341f1a1b1a201f1d2219181d18171c19171c19171a19181d1b1a1f17161a14131818171d17161b17161b18171d16141915141919181d0c0a0c100e101211141715191815191d1a1e1a16191b181b1d1a1d1e1a1d19161a1613150f0c0e1a1619221d211f1a1e221b1e181315241e21201a1d221a1b211a1c231a1b251c1d2018192a1e1f1f1718271b1a14141816151913131618171b16151a16151814141718171b1715191413161514181413171615191615191a181b1211141413171311141816190f0d0f0e0d0f110f12121013100f11110f121211141412141714161b191c16131517151919171a1714171814171c1719201c1f1915171f1a1b1c181a191416211a1b1b15171e191a211a1b20171713121615141915141916151a14131714131618171c14131716151914121619181d14131714141818171c18161a1615181313161413171312151a181d1d1b1f1a181d201c221d1a1e1f1b20201d211a171a1916191514171816191615181a181d16141818161919161a1b181c1714161b171a1d181b1915171a16181f181a1e181a1a15171c1618';
+  const pal=new Uint8Array(N*N*3); for(let k=0;k<N*N*3;k++) pal[k]=parseInt(HEX.substr(k*2,2),16);
+  const colorAt=(i,j)=>{const ci=Math.max(0,Math.min(N-1,i)),cj=Math.max(0,Math.min(N-1,j)),k=(cj*N+ci)*3;return [pal[k],pal[k+1],pal[k+2]]};
+  // palette is sampled at the render's own block centers, so build it with the same phase
+
+  const hash=(a,b)=>{let h=(a*73856093)^(b*19349663);h=(h^(h>>>13))*1274126177;return ((h^(h>>>16))>>>0)/4294967296};
+  const lerp=(a,b,t)=>a+(b-a)*t, sm=t=>t*t*(3-2*t);
+  function vnoise(x,y){const x0=Math.floor(x),y0=Math.floor(y),fx=sm(x-x0),fy=sm(y-y0);return lerp(lerp(hash(x0,y0),hash(x0+1,y0),fx),lerp(hash(x0,y0+1),hash(x0+1,y0+1),fx),fy)}
+  const noise=(i,j)=>0.7*vnoise(i/5+11,j/5+5)+0.3*vnoise(i/2.2+3,j/2.2+17);
+  const bgColor=()=>{const m=getComputedStyle(document.body).backgroundColor.match(/\d+/g);return m?m.slice(0,3).map(Number):[245,241,236]};
+  let blocks=[], pitch=10, W=0, H=0, dpr=1, mouse={x:-1e4,y:-1e4}, base=null, far=null, ox=0, oy=0, aw=0;
+  function build(){
+    img.style.clipPath='none';
+    const a=av.getBoundingClientRect(), BG=bgColor();
+    W=document.documentElement.clientWidth; H=document.documentElement.scrollHeight;
+    dpr=Math.min(2,devicePixelRatio||1); cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px';
+    pitch=a.width/N; aw=a.width; const PH=(21.5/1254)*aw; const oy0=a.top+scrollY; ox=a.left+PH-pitch; oy=oy0+PH-pitch;   // align to the render's own seam phase
+    const tk=document.querySelector('.talk').getBoundingClientRect(); const stacked = tk.top >= a.bottom-2;
+    // everything is measured from the face, in blocks: solid out to R0, then thinning, then the odd block far away
+    const fcx=a.left+aw*0.5, fcy=oy0+aw*0.47;                 // face center
+    const R0=11, R1=26, RCOLOR=34;                        // solid radius (the face); cloud span; color drain span
+    const cols=Math.ceil(W/pitch)+1, rows=Math.ceil(H/pitch)+1, i0=Math.floor(-ox/pitch)-1, j0=Math.floor(-oy/pitch)-1;
+    // a few "pockets" down the page where debris collects, like it drifted and settled
+    const pockets=[]; for(let k=0;k<6;k++){ pockets.push({x:W*(0.1+0.8*hash(k*3+1,7)), y:H*(0.18+0.78*hash(k*5+2,11)), r:pitch*(6+10*hash(k,k+1)) }); }
+    heroH=document.querySelector('.herowrap').getBoundingClientRect().bottom+scrollY;
+    blocks=[];
+    for(let j=j0;j<j0+rows;j++)for(let i=i0;i<i0+cols;i++){
+      const x=ox+i*pitch, y=oy+j*pitch, inside = (x+pitch>a.left+0.5 && x<a.left+aw-0.5 && y+pitch>oy0+0.5 && y<oy0+aw-0.5);
+      let ex=(x+pitch/2-fcx)/pitch, ey=(y+pitch/2-fcy)/pitch; if(!stacked && ex>0) ex*=1.35; if(ey<0) ey*=1.25;   // the field is squeezed upward too, so the image's top edge erodes like its sides
+      const rr=Math.hypot(ex,ey), n=noise(i,j), h=hash(i,j), h2=hash(i*7+1,j*3+2);
+      if(rr<R0) continue;                                 // the face itself: untouched
+      const t=Math.max(0,(rr-R0)/R1);
+      // cloud: presence decays smoothly from the face outward, blotchy via noise; the square's boundary plays no part
+      let pres = 1.0 - Math.pow(Math.min(1.4,t),1.15)*0.95 + (n-0.5)*0.75;
+      if(x>tk.left-pitch*2 && x<tk.right+pitch*2 && y>tk.top+scrollY-pitch*2 && y<tk.bottom+scrollY+pitch*2) pres -= 0.7;
+      // page debris, structured rather than uniform:
+      //   drift lines: runs along grid rows/cols where a 1-D noise is high
+      const line = (vnoise(j/7+40, 2)>0.92 && hash(i>>3,j)>0.8 && h<0.45) || (vnoise(2, i/9+90)>0.95 && hash(i,j>>3)>0.85 && h<0.4);
+      //   clusters: smooth noise peaks
+      const clump = n>0.80 && h<0.2;
+      //   pockets
+      let pk=0; for(const q of pockets){ const d=Math.hypot(x-q.x,y-q.y)/q.r; if(d<1) pk=Math.max(pk,(1-d)*(1-d)); }
+      const pocket = h < pk*0.3;
+      //   plus a thin random floor
+      const stray = false;
+      // partial cells along the image's margin (the render's seam phase leaves a strip narrower than one block) are always erased
+      const partial = inside && (x < a.left-0.5 || x+pitch > a.left+aw+0.5 || y < oy0-0.5 || y+pitch > oy0+aw+0.5);
+      if(y>heroH-pitch) continue;
+      const present = !partial && ((0.5*n+0.5*h) < pres || stray); const colored = present && !inside;
+      const gridP = Math.max(0, 1-t/1.2);
+      if(!colored){ if(inside){ if(present) continue; } else if(h2>gridP) continue; }
+      let col, relief;
+      if(colored){
+        const own=colorAt(i,j), ri=Math.floor(hash(i+5,j+9)*N), rj=Math.floor(hash(i+2,j+13)*N), rnd=colorAt(ri,rj);
+        const dbr = 0.6*sm(Math.max(0,Math.min(1,(rr-26)/14)));
+        let c=[0,1,2].map(k=>lerp(own[k],rnd[k],dbr));
+        const fade = Math.min(0.9, 0.9*sm(Math.max(0,Math.min(1,(rr-24)/RCOLOR))));   // no drain until past the image's own reach (~22 blocks), so inside and outside match
+        const f2 = (stray && t>1) ? 0.45+0.3*h : fade;
+        col=c.map((v,k)=>lerp(v,BG[k],f2)); relief=1-f2*0.5;
+      }else{ col=BG; relief= inside ? 0.9*Math.max(0.3,1-t) : 0.9*Math.max(0.25,gridP); }
+      blocks.push({x,y,col,relief,alpha:1,colored,inside,cover: inside});
+    }
+    // render the resting field once; per frame only the blocks near the cursor are redrawn
+    base=document.createElement('canvas'); base.width=cv.width; base.height=cv.height;
+    const bx=base.getContext('2d'); bx.setTransform(dpr,0,0,dpr,0,0);
+    far=document.createElement('canvas'); far.width=cv.width; far.height=cv.height;
+    const fx=far.getContext('2d'); fx.setTransform(dpr,0,0,dpr,0,0);
+    for(const b of blocks){ if(b.y>heroH || b.cover) drawBlock(bx,b,0); else drawBlock(fx,b,0); }
+    composite();
+  }
+  function rr(x,y,s,r){cv.getContext('2d').roundRect(x,y,s,s,r)}
+  function drawBlock(x,b,lift){
+    const s=pitch, [r,g,bl]=b.col;
+    if(b.cover){ // erase a render block: flat page-colored square, a hair larger than the pitch, no shading
+      x.globalAlpha=1; x.fillStyle=`rgb(${r},${g},${bl})`; x.fillRect(b.x-1,b.y-1,s+2,s+2);
+      // faint emboss so the erased cell still reads as part of the grid
+      x.fillStyle=`rgba(0,0,0,${0.05*b.relief})`; x.fillRect(b.x,b.y+s-1,s,1); x.fillStyle=`rgba(255,255,255,${0.05*b.relief})`; x.fillRect(b.x,b.y,s,1);
+      return;
+    }
+    const seam=Math.max(1,pitch*0.08), rad=pitch*0.16;
+    const grow=lift*pitch*0.2, size=s-seam+grow, px=b.x-grow/2, py=b.y-grow/2;
+    const k=1+lift*0.2;
+    x.globalAlpha=b.alpha;
+    if(b.colored){ x.fillStyle=`rgb(${r*0.90|0},${g*0.90|0},${bl*0.90|0})`; x.fillRect(b.x-grow/2-0.5,b.y-grow/2-0.5,s+grow+1,s+grow+1); }
+    x.fillStyle=`rgb(${r*k|0},${g*k|0},${bl*k|0})`; x.beginPath(); x.roundRect(px,py,size,size,rad); x.fill();
+    const gr=x.createLinearGradient(px,py,px,py+size);
+    gr.addColorStop(0,`rgba(255,255,255,${0.07*b.relief})`); gr.addColorStop(.45,'rgba(255,255,255,0)'); gr.addColorStop(1,`rgba(0,0,0,${0.09*b.relief})`);
+    x.fillStyle=gr; x.beginPath(); x.roundRect(px,py,size,size,rad); x.fill();
+    x.globalAlpha=1;
+  }
+  // parallax: the cloud around the portrait and the portrait itself shift with the pointer at different rates, eased
+  let px=0, py=0, tx=0, ty=0, heroH=0;
+  function composite(){
+    const x=cv.getContext('2d'); x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,cv.width,cv.height);
+    if(reduce){ x.drawImage(base,0,0); x.drawImage(far,0,0); return; }
+    const hb=Math.round(heroH*dpr);
+    // near layer: page debris stays put; the hero's cover tiles move with the image (same offset), so no edge can show
+    x.drawImage(base,0,hb,cv.width,cv.height-hb,0,hb,cv.width,cv.height-hb);
+    x.drawImage(base,0,0,cv.width,hb,Math.round(px*0.5*dpr),Math.round(py*0.5*dpr),cv.width,hb);
+    // far layer: the cloud outside the portrait, moving more, so it reads as floating in front
+    x.drawImage(far,0,0,cv.width,hb,Math.round(px*dpr),Math.round(py*dpr),cv.width,hb);
+    x.setTransform(dpr,0,0,dpr,0,0); const R=170;
+    for(const b of blocks){ if(b.y>heroH) break; if(b.cover) continue; const md=Math.hypot(b.x+px+pitch/2-mouse.x,b.y+py+pitch/2-mouse.y); if(md<R){ x.save(); x.translate(px,py); drawBlock(x,b,1-md/R); x.restore(); } }
+  }
+  function tick(){ px+=(tx-px)*0.08; py+=(ty-py)*0.08; composite(); if(Math.abs(tx-px)>0.05||Math.abs(ty-py)>0.05||mouseNear) requestAnimationFrame(tick); else ticking=false; }
+  let ticking=false, mouseNear=false;
+  function kick(){ if(!ticking){ ticking=true; requestAnimationFrame(tick);} }
+  function start(){ build(); }
+  if(img.complete&&img.naturalWidth) start(); else img.addEventListener('load',start);
+  let rt=null; addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(build,150)});
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',build);
+  addEventListener('pointermove',e=>{ mouse={x:e.clientX,y:e.clientY+scrollY};
+    tx=0; ty=0; mouseNear = e.clientY+scrollY < heroH+200; kick(); },{passive:true});
+  addEventListener('pointerleave',()=>{tx=0;ty=0;mouseNear=false;kick()});
+  addEventListener('scroll',()=>{ if(scrollY>heroH) mouseNear=false; },{passive:true});
+})();
+// waveform bars
+const bars=document.getElementById('bars'); for(let i=0;i<28;i++){const s=document.createElement('i');s.style.setProperty('--h',(10+Math.abs(Math.sin(i*0.7))*30)+'px');s.style.animationDelay=(i*0.07)+'s';bars.appendChild(s)}
+// card glare + play only on screen
+document.querySelectorAll('.card').forEach(c=>c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect();const g=c.querySelector('.glare');g.style.left=(e.clientX-r.left)+'px';g.style.top=(e.clientY-r.top)+'px'}));
+if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(x=>{const v=x.target;x.isIntersecting?v.play().catch(()=>{}):v.pause()}),{threshold:.15});document.querySelectorAll('video').forEach(v=>io.observe(v));}
+</script>
+
+</body>
+</html>
