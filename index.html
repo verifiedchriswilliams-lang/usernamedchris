@@ -49,7 +49,7 @@ h1,h2,h3{text-wrap:balance}
 /* ===== hero: portrait + the voice agent ===== */
 .herowrap{position:static;overflow:visible;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px))) 0 calc(-1 * max(16px,env(safe-area-inset-right,0px)));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .top{z-index:10}
-.hero{position:relative;display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:56px;align-items:center;padding:64px 0 56px;max-width:1260px;margin:0 auto}
+.hero{position:relative;display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:56px;align-items:center;padding:64px 0 24px;max-width:1260px;margin:0 auto}
 @media (max-width:860px){
   .hero{grid-template-columns:1fr;gap:18px;padding-top:20px;padding-bottom:28px}
   .talk h1{font-size:32px;white-space:nowrap;letter-spacing:-.035em}
@@ -63,7 +63,7 @@ h1,h2,h3{text-wrap:balance}
 @media (max-width:860px){.avatar-phone{display:block}}
 /* phones: the photo becomes a chip beside the name, Bill-style, instead of a screen-filling circle */
 @media (max-width:860px){
-  .hero{display:block}
+  .hero{display:block;padding-bottom:8px}
   .avatar-desk{display:none}
   .talk .top-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px}
   .talk .top-row .avatar-phone{order:2}
@@ -95,7 +95,7 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 .agent .status b{color:var(--fg);font-weight:600}
 
 /* ===== section label ===== */
-.label{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:44px 0 16px;padding-top:18px;border-top:1px solid var(--line)}
+.label{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:36px 0 16px;padding-top:18px;border-top:1px solid var(--line)}
 .label h2{margin:0;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
 .label span{font-size:13px;color:var(--muted)}
 
@@ -143,6 +143,10 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 .links span{font-size:13px;color:var(--muted);line-height:1.4}
 .links em{font-style:normal;font-size:12px;margin-top:4px;color:var(--fg)}
 
+.about{max-width:68ch;display:flex;flex-direction:column;gap:16px}
+.about p{margin:0;font-size:17px;line-height:1.6}
+.about .belief{padding:18px 22px;border-left:3px solid transparent;border-image:var(--grad) 1;background:var(--panel);border-radius:0 14px 14px 0}
+@media (max-width:860px){.about p{font-size:16px}}
 .foot{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;font-size:12.5px;color:var(--muted)}
 .foot b{color:var(--fg);font-weight:600}
 </style>
@@ -163,7 +167,7 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 <!-- HERO: the voice agent -->
 </div>
 <div class="herowrap">
-<section class="hero" id="about">
+<section class="hero">
   <div class="avatar avatar-desk" id="avatar"><img src="media/photo.png?v=2" id="avatarImg" alt="Chris Williams" width="1000" height="1000"></div>
 
   <div class="talk">
@@ -206,6 +210,16 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
     <div class="meta"><h3>The Prob</h3><p>What the crowd is betting on, out of market-speak. Daily.</p><span class="cta">Read today's brief →</span></div>
   </a>
 </main>
+
+<!-- ABOUT -->
+<div class="label" id="about"><h2>About</h2></div>
+<section class="about">
+  <p>I've spent twenty-plus years building things people use every day: streaming platforms, subscription businesses, podcast networks, consumer apps. Along the way I've been a COO, a President, a General Manager, and Chief Product Officer, which is a long way of saying I've run product, technology, growth, and operations, usually all at once.</p>
+  <p>I'll brag on my role at iHeartRadio, where I transitioned from a legacy media executive and fully immersed in product and technology, ultimately serving as the GM &amp; Chief Product Officer for over 7 years. I oversaw a 165-person team across product, engineering, design, analytics, and marketing. We took the platform from under 50 million registered users to more than 150 million, grew digital revenue 86% in a year, and I was the executive sponsor for the acquisition that became iHeart's podcast business, now the largest in the world, a $55M acquisition that has generated close to $3B in revenue since 2018.</p>
+  <p>Most recently I was COO of The Daily Wire, where my job was to make strategy, execution, and the numbers agree with each other. We cut costs 15%, nearly doubled margins, and launched a new line of business that added $15 million in annual revenue.</p>
+  <p class="belief">Here's what I believe: growth is what happens when a product keeps its promises. Figure out the role people want you to play in their lives, then build the whole company around delivering on it, over and over. Every kept promise makes the relationship stronger. Every broken one costs you.</p>
+  <p>That's how I think about product, brand, leadership, and operations. Not distinct roles. One system that aligns to build something people feel is essential to their lives.</p>
+</section>
 
 <!-- THE STATION -->
 <div class="label"><h2>On air</h2><span>In progress</span></div>
