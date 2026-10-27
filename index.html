@@ -187,13 +187,13 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 @media (max-width:960px){.about{grid-template-columns:1fr;gap:24px}.belief{padding:26px 24px 24px}.belief .big{font-size:26px}}
 @media (max-width:860px){.about .bio p{font-size:16px}}
 /* ===== resume: a collapsed bar under About that unfolds into the full run ===== */
-.resume{margin-top:20px;border-radius:24px;background:var(--panel);box-shadow:var(--card-shadow);overflow:hidden}
+.resume{margin-top:0;border-radius:24px;background:var(--panel);box-shadow:var(--card-shadow);overflow:hidden}
 .resume-toggle{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:22px 26px;border:0;background:transparent;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
 .resume-toggle:hover .rt-hint{color:var(--fg)}
 .resume-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:-4px;border-radius:24px}
 .rt-left{display:flex;flex-direction:column;gap:4px}
-.rt-left .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.rt-title{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.rt-title{font-size:22px;font-weight:800;letter-spacing:-.025em}
+.rt-sub{font-size:14px;color:var(--muted)}
 .rt-right{display:flex;align-items:center;gap:12px}
 .rt-hint{font-size:13px;font-weight:500;color:var(--muted);transition:color .2s}
 .rt-chev{width:36px;height:36px;border-radius:50%;background:var(--grad);position:relative;flex:0 0 36px;transition:transform .4s cubic-bezier(.22,1,.36,1)}
@@ -237,7 +237,7 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 .rs-collapse{font:inherit;font-size:13px;font-weight:500;color:var(--muted);background:none;border:0;cursor:pointer;padding:0}
 .rs-collapse:hover{color:var(--fg)}
 @media (max-width:860px){
-  .resume-toggle{padding:18px 18px}.rt-title{font-size:17px}.rt-hint{display:none}
+  .resume-toggle{padding:18px 18px}.rt-title{font-size:18px}.rt-sub{font-size:13px}.rt-hint{display:none}
   .resume-inner{padding:0 18px}.rs-head h3{font-size:26px}
   .stats,.builds{grid-template-columns:1fr 1fr}.stat b{font-size:26px}
   .job{grid-template-columns:1fr;gap:6px}.job .when{padding-top:0}
@@ -326,9 +326,10 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 </section>
 
 <!-- RESUME (collapsed by default) -->
+<div class="label" id="resume-label"><h2>Resume</h2><span>Collapsed by default. Open at your own risk.</span></div>
 <section class="resume" id="resume">
   <button class="resume-toggle" type="button" id="resumeToggle" aria-expanded="false" aria-controls="resumeBody">
-    <span class="rt-left"><span class="k">Resume</span><span class="rt-title">The full run, 2013 to now</span></span>
+    <span class="rt-left"><span class="rt-title">Receipts, if you want them.</span><span class="rt-sub">The HR'd run-through of my experience.</span></span>
     <span class="rt-right"><span class="rt-hint">Expand</span><span class="rt-chev" aria-hidden="true"></span></span>
   </button>
   <div class="resume-body" id="resumeBody">
