@@ -128,7 +128,6 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 /* ===== card grid ===== */
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
 @media (max-width:560px){.grid{grid-template-columns:1fr;gap:18px}}
-}
 .card{position:relative;display:block;aspect-ratio:3/4;max-width:100%;border-radius:22px;overflow:hidden;background:#111;
   box-shadow:var(--card-shadow);transform:translateY(0);transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s cubic-bezier(.22,1,.36,1);isolation:isolate}
 .card:hover,.card:focus-visible{transform:translateY(-6px);box-shadow:var(--card-shadow-hover)}
@@ -154,6 +153,7 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
   .meta h3{font-size:21px;margin-bottom:4px}
   .meta p{font-size:14.5px;color:var(--muted);opacity:1;max-width:none}
   .meta .cta{opacity:1;color:var(--fg);font-weight:600}
+}
 
 /* ===== the station band ===== */
 .station{position:relative;overflow:hidden;border-radius:24px;background:var(--dark);color:var(--ink-on-dark);padding:28px 28px 26px;display:grid;grid-template-columns:1fr auto;gap:20px 32px;align-items:end;box-shadow:var(--card-shadow)}
