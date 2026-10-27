@@ -58,8 +58,17 @@ h1,h2,h3{text-wrap:balance}
   .agent{grid-template-columns:1fr;gap:12px;padding:18px 18px 16px}
   .call{justify-content:center;width:100%}
 }
-.avatar{position:relative;aspect-ratio:1;width:min(100%,300px);border-radius:50%;overflow:hidden;background:var(--panel-2);box-shadow:0 0 0 5px var(--panel),0 0 0 6px var(--line),0 10px 24px rgba(40,30,20,.10)}
-.avatar img{display:block;width:100%;height:100%;object-fit:cover}
+/* the photo is a second "talk" button: spinning gradient ring, a pulse, and a LIVE pill */
+.avatar{position:relative;aspect-ratio:1;width:min(100%,300px);border-radius:50%;background:var(--panel-2);cursor:pointer;box-shadow:0 0 0 5px var(--panel),0 10px 24px rgba(40,30,20,.10);transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.avatar:hover{transform:translateY(-3px) scale(1.015)}
+.avatar:focus-visible{outline:2px solid var(--accent);outline-offset:14px}
+.avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.avatar .ring{position:absolute;inset:-9px;border-radius:50%;padding:3px;background:conic-gradient(from 0deg,#2E2BE8,#B02BD0,#E8408F,#2E2BE8);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 7s linear infinite;pointer-events:none}
+.avatar:before{content:"";position:absolute;inset:-9px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:pulse 2.6s ease-out infinite;pointer-events:none}
+.avatar .live{position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:999px;background:#17161A;color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;box-shadow:0 0 0 3px var(--bg),0 6px 16px rgba(0,0,0,.25);white-space:nowrap;pointer-events:none}
+.avatar .live i{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:blink 1.4s infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%{transform:scale(1);opacity:.55}100%{transform:scale(1.16);opacity:0}}
 .avatar-phone{display:none}
 @media (max-width:860px){.avatar-phone{display:block}}
 /* phones: the photo becomes a chip beside the name, Bill-style, instead of a screen-filling circle */
@@ -68,7 +77,11 @@ h1,h2,h3{text-wrap:balance}
   .avatar-desk{display:none}
   .talk .top-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px}
   .talk .top-row .avatar-phone{order:2}
-  .avatar{width:72px;flex:0 0 72px;margin:0;box-shadow:0 0 0 3px var(--panel),0 0 0 4px var(--line),0 8px 18px rgba(40,30,20,.16)}
+  .avatar{width:72px;flex:0 0 72px;margin:0;box-shadow:0 0 0 3px var(--panel),0 8px 18px rgba(40,30,20,.16)}
+  .avatar .ring{inset:-6px;padding:2px}
+  .avatar:before{inset:-6px}
+  .avatar .live{left:auto;right:-3px;bottom:0;transform:none;padding:4px;gap:0;box-shadow:0 0 0 2px var(--bg)}
+  .avatar .live i{width:7px;height:7px}
   .talk h1{margin:0;flex:1;min-width:0}
 }
 .talk,.label,.grid,.station,.links,.foot{position:relative;z-index:1}
@@ -83,10 +96,17 @@ h1,h2,h3{text-wrap:balance}
 .agent:after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:14px 14px;pointer-events:none;mask-image:radial-gradient(120% 80% at 100% 0,#000 20%,transparent 70%)}
 .agent .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.85;margin:0 0 6px}
 .agent h3{margin:0 0 4px;font-size:22px;font-weight:700;letter-spacing:-.02em}
-.agent .what{margin:0;opacity:.9;font-size:14px;line-height:1.45;max-width:40ch}
-.call{position:relative;z-index:1;display:inline-flex;align-items:center;gap:10px;font:inherit;font-weight:600;font-size:15px;padding:14px 22px;border-radius:999px;border:0;background:#fff;color:#1a1740;cursor:pointer;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.2)}
+.agent .what{margin:0;opacity:.9;font-size:14px;line-height:1.45;max-width:44ch}
+.agent .what em{font-style:italic;opacity:.85}
+.call{position:relative;z-index:1;overflow:hidden;display:inline-flex;align-items:center;gap:10px;font:inherit;font-weight:600;font-size:15px;padding:14px 22px;border-radius:999px;border:0;background:#fff;color:#1a1740;cursor:pointer;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.2);transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s}
+.call:hover{transform:translateY(-2px);box-shadow:0 14px 28px rgba(0,0,0,.3)}
 .call:focus-visible{outline:2px solid #fff;outline-offset:3px}
-.call .dot{width:10px;height:10px;border-radius:50%;background:var(--grad)}
+/* live indicators: a pinging dot plus a slow sheen sweeping the pill */
+.call .dot{position:relative;width:10px;height:10px;border-radius:50%;background:var(--grad);flex:0 0 10px}
+.call .dot:after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid #B02BD0;animation:pulse 1.8s ease-out infinite}
+.call:after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(110deg,transparent 35%,rgba(176,43,208,.16) 50%,transparent 65%);background-size:250% 100%;animation:sheen 3.2s ease-in-out infinite;pointer-events:none}
+@keyframes sheen{0%{background-position:160% 0}100%{background-position:-160% 0}}
+@media (prefers-reduced-motion:reduce){.avatar .ring,.avatar:before,.call .dot:after,.call:after,.avatar .live i{animation:none}.avatar:before{display:none}}
 @media (max-width:860px){.agent{grid-template-columns:1fr}}
 /* the ElevenLabs widget is a floating launcher by design: pinned bottom-right, sized with its own custom properties (per their docs) */
 elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlabs-convai-widget-width:400px;--elevenlabs-convai-widget-height:600px}
@@ -181,16 +201,16 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 </div>
 <div class="herowrap">
 <section class="hero">
-  <div class="avatar avatar-desk" id="avatar"><img src="media/photo.png?v=2" id="avatarImg" alt="Chris Williams" width="1000" height="1000"></div>
+  <div class="avatar avatar-desk" id="avatar" role="button" tabindex="0" aria-label="Talk to Other.Chris, my voice agent" title="Talk to Other.Chris"><div class="ring"></div><img src="media/photo.png?v=2" id="avatarImg" alt="Chris Williams" width="1000" height="1000"><span class="live"><i></i>Live</span></div>
 
   <div class="talk">
-    <div class="top-row"><div class="avatar avatar-phone" aria-hidden="true"><img src="media/photo.png?v=2" alt="" width="1000" height="1000"></div><h1>Hi, I'm UserNamedChris</h1></div>
-    <p class="lede">I build media, audio and AI products people love. Wanna know more about me? Start a conversation with my AI agent, Other.Chris (OC).</p>
+    <div class="top-row"><div class="avatar avatar-phone" role="button" tabindex="0" aria-label="Talk to Other.Chris, my voice agent"><div class="ring"></div><img src="media/photo.png?v=2" alt="" width="1000" height="1000"><span class="live"><i></i></span></div><h1>Hi, I'm UserNamedChris</h1></div>
+    <p class="lede">BJJ blue belt under Renzo Gracie, fly fisher, dad, and self-appointed breakfast cereal sommelier. When I'm not on the mats or in a river, I build media, audio and AI products people love. Get to know me through my AI agent, Other.Chris (OC).</p>
     <div class="agent" aria-label="Voice agent">
       <div>
         <p class="k">Live · voice agent</p>
         <h3>Chat with Other.Chris (OC)</h3>
-        <p class="what">The version of me that never sleeps. Ask it anything.</p>
+        <p class="what">The version of me that never sleeps. Ask it anything. (OK, not <em>anything</em>.)</p>
       </div>
       <button class="call" type="button" id="openAgent"><span class="dot"></span>Talk now</button>
     </div>
@@ -228,18 +248,18 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 <div class="label" id="about"><h2>About</h2></div>
 <section class="about">
   <div class="bio">
-    <p>I've spent twenty-plus years building things people use every day: streaming platforms, subscription businesses, podcast networks, consumer apps. Along the way I've been a COO, a President, a General Manager, and Chief Product Officer, which is a long way of saying I've run product, technology, growth, and operations, usually all at once.</p>
+    <p>I've spent twenty-plus years building things people use every day: streaming platforms, subscription businesses, podcast networks, consumer apps. Along the way I've been a COO, a President, a General Manager, and Chief Product Officer, which is a long way of saying I've run product, technology, growth, and operations, usually all at the same time.</p>
     <p class="role">iHeartRadio · GM &amp; Chief Product Officer</p>
-    <p>I'll brag on my role at iHeartRadio, where I transitioned from a legacy media executive and fully immersed in product and technology, ultimately serving as the GM &amp; Chief Product Officer for over 7 years.</p>
-    <p class="role">The Daily Wire · COO</p>
+    <p>I transitioned from a legacy media executive to a fully fledged product and technology leader, ultimately serving as the GM &amp; Chief Product Officer for over 7 years during their largest streaming and podcast growth periods.</p>
+    <p class="role">The Daily Wire · COO · Chief Digital Officer</p>
     <p>Most recently I was COO of The Daily Wire, where my job was to make strategy, execution, and the numbers agree with each other.</p>
   </div>
   <aside class="belief" aria-label="What I believe">
     <p class="k">Here's what I believe</p>
-    <p class="big"><em>Growth is what happens when a product keeps its promises.</em></p>
-    <p class="how">Figure out the role people want you to play in their lives, then build the whole company around delivering on it, over and over. Every kept promise makes the relationship stronger. Every broken one costs you.</p>
+    <p class="big"><em>Growth is the byproduct of a product with a clear vision that keeps its promises.</em></p>
+    <p class="how">Figure out the role your audience needs you to play in their lives, then build the whole company around delivering on it, over and over. Every kept promise deepens trust and strengthens the consumer relationship. Every broken promise takes you back to square one.</p>
     <div class="rule"></div>
-    <p class="close">That's how I think about product, brand, leadership, and operations. <b>Not distinct roles.</b> One system that aligns to build something people feel is essential to their lives.</p>
+    <p class="close">That's how I think about product, brand, leadership, and operations. <b>Not distinct silos,</b> but one system that aligns to build something people love and feel is essential in their lives.</p>
   </aside>
 </section>
 
@@ -279,17 +299,14 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
   fit(); addEventListener('resize',fit); document.fonts&&document.fonts.ready.then(fit); })();
 // marquee
 const rail=document.getElementById('rail'); rail.innerHTML=rail.innerHTML.repeat(4);
-// phone headline: shrink to fit one line
-(function(){const h=document.querySelector('.talk h1'); if(!h) return;
-  function fit(){ if(innerWidth>860){h.style.fontSize='';return;} let fs=34; h.style.fontSize=fs+'px'; const max=document.querySelector('.hero').clientWidth-(innerWidth<=860?72+14:0); while(h.scrollWidth>max && fs>18){fs-=1; h.style.fontSize=fs+'px';} }
-  fit(); addEventListener('resize',fit); document.fonts&&document.fonts.ready.then(fit); })();
-// marquee
-// hero button: open the floating ElevenLabs widget (click its launcher inside the shadow root)
-document.getElementById('openAgent').addEventListener('click',()=>{
+// hero button + profile photo: open the floating ElevenLabs widget (click its launcher inside the shadow root)
+function openAgent(){
   const w=document.querySelector('elevenlabs-convai'); if(!w) return;
   const root=w.shadowRoot; const btn=root && [...root.querySelectorAll('button')].find(b=>/talk|call|start|open/i.test(b.textContent+b.getAttribute('aria-label')));
   if(btn) btn.click(); else w.scrollIntoView({behavior:'smooth',block:'end'});
-});
+}
+document.querySelectorAll('#openAgent,.avatar').forEach(el=>el.addEventListener('click',openAgent));
+document.querySelectorAll('.avatar').forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openAgent();}}));
 // card glare + play only on screen
 document.querySelectorAll('.card').forEach(c=>c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect();const g=c.querySelector('.glare');g.style.left=(e.clientX-r.left)+'px';g.style.top=(e.clientY-r.top)+'px'}));
 if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(x=>{const v=x.target;x.isIntersecting?v.play().catch(()=>{}):v.pause()}),{threshold:.15});document.querySelectorAll('video').forEach(v=>io.observe(v));}
