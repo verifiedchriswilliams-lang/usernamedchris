@@ -186,6 +186,63 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 .belief .close b{color:#fff;font-weight:600}
 @media (max-width:960px){.about{grid-template-columns:1fr;gap:24px}.belief{padding:26px 24px 24px}.belief .big{font-size:26px}}
 @media (max-width:860px){.about .bio p{font-size:16px}}
+/* ===== resume: a collapsed bar under About that unfolds into the full run ===== */
+.resume{margin-top:20px;border-radius:24px;background:var(--panel);box-shadow:var(--card-shadow);overflow:hidden}
+.resume-toggle{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:22px 26px;border:0;background:transparent;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.resume-toggle:hover .rt-hint{color:var(--fg)}
+.resume-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:-4px;border-radius:24px}
+.rt-left{display:flex;flex-direction:column;gap:4px}
+.rt-left .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.rt-title{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.rt-right{display:flex;align-items:center;gap:12px}
+.rt-hint{font-size:13px;font-weight:500;color:var(--muted);transition:color .2s}
+.rt-chev{width:36px;height:36px;border-radius:50%;background:var(--grad);position:relative;flex:0 0 36px;transition:transform .4s cubic-bezier(.22,1,.36,1)}
+.rt-chev:after{content:"";position:absolute;left:50%;top:50%;width:9px;height:9px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:translate(-50%,-65%) rotate(45deg)}
+.resume.open .rt-chev{transform:rotate(180deg)}
+.resume-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s cubic-bezier(.22,1,.36,1)}
+.resume.open .resume-body{grid-template-rows:1fr}
+.resume-inner{min-height:0;overflow:hidden;padding:0 26px}
+.resume.open .resume-inner{padding-bottom:28px}
+.rs-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px 24px;padding-top:6px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.rs-head h3{margin:0;font-size:30px;font-weight:900;letter-spacing:-.03em}
+.rs-roles{margin:4px 0 0;font-size:13.5px;color:var(--muted)}
+.rs-contact{margin:0;display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px}
+.rs-contact a{color:var(--fg);border-bottom:1px solid var(--line)}
+.rs-dl{font-weight:600;border-bottom-color:var(--accent)!important}
+.rs-summary{margin:0 0 26px;font-size:16px;line-height:1.6;max-width:78ch;color:var(--fg)}
+.rs-label{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;padding-top:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px}
+.stat{padding:16px 18px;border-radius:16px;background:var(--panel-2);display:flex;flex-direction:column;gap:6px}
+.stat b{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;line-height:1.45;color:var(--muted)}
+.jobs{display:flex;flex-direction:column;margin-bottom:28px}
+.job{display:grid;grid-template-columns:170px 1fr;gap:20px;padding:18px 0;border-top:1px solid var(--line)}
+.job:last-child{border-bottom:1px solid var(--line)}
+.job .when{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--muted);padding-top:4px}
+.job h4{margin:0 0 8px;font-size:17px;font-weight:700;letter-spacing:-.015em;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.job h4 span{font-size:13px;font-weight:500;color:var(--muted)}
+.job p{margin:0;font-size:15px;line-height:1.55}
+.job ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.job li{font-size:15px;line-height:1.55;padding-left:16px;position:relative}
+.job li:before{content:"";position:absolute;left:0;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--grad)}
+.job li b{font-weight:600}
+.builds{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px}
+.builds a{display:flex;flex-direction:column;gap:6px;padding:16px 18px;border-radius:16px;background:var(--panel-2);transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.builds a:hover{transform:translateY(-3px)}
+.builds b{font-size:15px;font-weight:700}
+.builds span{font-size:13px;line-height:1.45;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+.chips span{font-size:12.5px;font-weight:500;padding:7px 12px;border-radius:999px;border:1px solid var(--line);color:var(--fg)}
+.rs-foot{margin:0;display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:13px}
+.rs-collapse{font:inherit;font-size:13px;font-weight:500;color:var(--muted);background:none;border:0;cursor:pointer;padding:0}
+.rs-collapse:hover{color:var(--fg)}
+@media (max-width:860px){
+  .resume-toggle{padding:18px 18px}.rt-title{font-size:17px}.rt-hint{display:none}
+  .resume-inner{padding:0 18px}.rs-head h3{font-size:26px}
+  .stats,.builds{grid-template-columns:1fr 1fr}.stat b{font-size:26px}
+  .job{grid-template-columns:1fr;gap:6px}.job .when{padding-top:0}
+}
+@media (max-width:520px){.stats,.builds{grid-template-columns:1fr}}
 .foot{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;font-size:12.5px;color:var(--muted)}
 .foot b{color:var(--fg);font-weight:600}
 </style>
@@ -268,6 +325,102 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
   </aside>
 </section>
 
+<!-- RESUME (collapsed by default) -->
+<section class="resume" id="resume">
+  <button class="resume-toggle" type="button" id="resumeToggle" aria-expanded="false" aria-controls="resumeBody">
+    <span class="rt-left"><span class="k">Resume</span><span class="rt-title">The full run, 2013 to now</span></span>
+    <span class="rt-right"><span class="rt-hint">Expand</span><span class="rt-chev" aria-hidden="true"></span></span>
+  </button>
+  <div class="resume-body" id="resumeBody">
+    <div class="resume-inner">
+
+      <header class="rs-head">
+        <div>
+          <h3>Chris Williams</h3>
+          <p class="rs-roles">Chief Operating Officer · President · General Manager · Chief Product Officer</p>
+        </div>
+        <p class="rs-contact"><a href="mailto:verifiedchriswilliams@gmail.com">verifiedchriswilliams@gmail.com</a><a href="https://www.linkedin.com/in/usernamedchris/" target="_blank" rel="noopener">linkedin.com/in/usernamedchris</a><a class="rs-dl" href="media/Chris-Williams-Resume.pdf" download>Download PDF ↓</a></p>
+      </header>
+
+      <p class="rs-summary">I operate across product, technology, growth, and operations to build products that consumers love. For over 20 years I've built and scaled consumer products, subscription businesses, streaming platforms, and the organizations behind them. I've served as COO, President, General Manager, Chief Product Officer, and Advisor, leading teams of up to 165 and businesses inside organizations generating more than $1B a year. My career has been spent moving between strategy and execution: leading teams, building products, running businesses, and turning ambiguity into clarity and action.</p>
+
+      <div class="rs-label">Executive highlights</div>
+      <div class="stats">
+        <div class="stat"><b>160M+</b><span>Addressable audience at iHeartRadio, up more than 100M registered users in five years</span></div>
+        <div class="stat"><b>$3B+</b><span>Cumulative revenue since 2018 from the $55M Stuff Media acquisition I championed</span></div>
+        <div class="stat"><b>86%</b><span>Year-over-year digital revenue growth inside a $250M+ streaming business</span></div>
+        <div class="stat"><b>$50M+</b><span>Annual recurring revenue, iHeartRadio subscriptions built from zero</span></div>
+        <div class="stat"><b>#1</b><span>App Store Kids category, Bentkey Adventures, launched in under 100 days</span></div>
+        <div class="stat"><b>7% → 12%</b><span>EBITDA at The Daily Wire, with expenses down 15% and a $15M-profit Lifetime Membership</span></div>
+      </div>
+
+      <div class="rs-label">Experience</div>
+      <div class="jobs">
+        <div class="job">
+          <div class="when">May 2026 – Present</div>
+          <div class="what">
+            <h4>Super Hi-Fi <span>Advisor · Remote</span></h4>
+            <p>Advising an AI-powered streaming media technology platform responsible for more than 2 billion content and production decisions each month for brands including Sonos Radio, iHeartRadio, Peloton, and Fubo.</p>
+          </div>
+        </div>
+        <div class="job">
+          <div class="when">June 2023 – May 2026</div>
+          <div class="what">
+            <h4>The Daily Wire <span>Chief Operating Officer (2025–26) · President &amp; Chief Digital Officer (2023–25)</span></h4>
+            <ul>
+              <li><b>Operating transformation.</b> Built the company's operating framework across product, engineering, UX, IT, finance, marketing, and member experience. Reduced expenses 15%, improved EBITDA from 7% to 12%, and served as interim CMO during a leadership transition.</li>
+              <li><b>Subscriber growth.</b> Led the strategy behind a 70% year-over-year increase in new subscribers in 2024, the largest new-subscriber year in company history, including its highest-ever quarterly growth in Q4.</li>
+              <li><b>Technology rebuild.</b> Rebuilt the technology stack, frontend, and backend architecture within the first year, and introduced transparent execution practices across product, engineering, and content.</li>
+              <li><b>Zero to one.</b> Launched Bentkey Adventures across iOS, Android, Roku, Fire TV, and Samsung in under 100 days. #1 in the App Store Kids category, 500,000+ downloads and 100 million minutes streamed in its first six months.</li>
+              <li><b>New business and AI.</b> Launched Lifetime Membership, $15M in profit with zero paid media and 8% of annual revenue. Established an applied AI program spanning model evaluation, experimentation, and practical deployment.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="job">
+          <div class="when">2022 – 2024</div>
+          <div class="what">
+            <h4>Remix.ai · Collectibles.com · Audience.ai · The Easy Company <span>Advisor / Consultant</span></h4>
+            <p>Go-to-market strategy, product positioning, and audience data infrastructure for emerging technology startups in media, audience growth, web3, and AI.</p>
+          </div>
+        </div>
+        <div class="job">
+          <div class="when">Dec 2014 – Sep 2022</div>
+          <div class="what">
+            <h4>iHeartMedia / iHeartRadio <span>General Manager &amp; Chief Product Officer · New York</span></h4>
+            <ul>
+              <li><b>Platform transformation.</b> Led iHeartRadio from a digital radio product to a multiplatform audio destination, adding more than 100 million registered users in five years. P&amp;L responsibility for $250M+ in streaming revenue inside a $1.1B digital organization.</li>
+              <li><b>Music licensing.</b> Personally led negotiations with Universal, Sony, Warner, major publishers, and key independents to secure the agreements behind iHeartRadio Plus and All Access, taking iHeartRadio into on-demand music.</li>
+              <li><b>Revenue and audience.</b> Drove 86% year-over-year digital revenue growth in 2021 while growing listening 25%. Managed a 165-person organization across product, engineering, UX, analytics, and content.</li>
+              <li><b>Podcasts and subscriptions.</b> Built iHeartRadio into a top-three U.S. podcast platform with 500,000+ titles and 30 million episodes. Launched subscription tiers generating more than $50 million annually.</li>
+              <li><b>Strategic acquisition.</b> Championed the $55M acquisition of Stuff Media (HowStuffWorks), making iHeart the world's largest commercial podcast publisher. $3B+ in cumulative revenue since 2018.</li>
+              <li><b>Global distribution.</b> Expanded to 250+ OTT, connected home, automotive, and consumer electronics platforms, and led international expansion into Australia, New Zealand, Canada, and Mexico.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="job">
+          <div class="when">Nov 2013 – Dec 2014</div>
+          <div class="what">
+            <h4>iHeartMedia / iHeartRadio <span>SVP, Product &amp; Marketing · New York</span></h4>
+            <p>Led product marketing, digital content strategy, audience development, and brand partnerships for iHeartRadio and 900+ radio station websites. Built partnerships with Macy's, Nickelodeon, Wendy's, and others, and established user research and product positioning practices across the organization.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rs-label">Independent builds</div>
+      <div class="builds">
+        <a href="https://relaxed.app" target="_blank" rel="noopener"><b>relaxed.app</b><span>AI-native consumer mindfulness. Designed, built, and launched a personalized meditation product from 0 to 1, with bespoke sessions generated in real time and ElevenLabs for voice. Live on the App Store in 40+ countries.</span></a>
+        <a href="https://trendinginrealtime.com" target="_blank" rel="noopener"><b>Trending in Real Time</b><span>Editorial intelligence. Monitors 25 newsrooms in real time, clusters stories into trends, and shows which stories outlets are leading on, trailing, or missing.</span></a>
+        <a href="https://theprob.ai" target="_blank" rel="noopener"><b>The Prob</b><span>Prediction market intelligence. Tracks 2,000+ live positions across Kalshi and Polymarket with hourly Python pipelines, market analysis, and automated model orchestration.</span></a>
+      </div>
+
+      <div class="rs-label">Core competencies</div>
+      <div class="chips"><span>Operating framework design</span><span>P&amp;L leadership</span><span>Organizational transformation</span><span>AI enablement</span><span>Product &amp; technology strategy</span><span>Subscription growth</span><span>Strategic M&amp;A</span><span>Revenue growth</span><span>Consumer platform scale (160M+)</span><span>Zero-to-one execution</span><span>CEO &amp; board partnership</span><span>Cross-functional ops</span></div>
+
+      <p class="rs-foot"><a class="rs-dl" href="media/Chris-Williams-Resume.pdf" download>Download the PDF ↓</a><button type="button" class="rs-collapse" id="resumeCollapse">Collapse ↑</button></p>
+    </div>
+  </div>
+</section>
+
 <!-- THE STATION -->
 <div class="label"><h2>On air</h2><span>In progress</span></div>
 <section class="station" id="station" aria-label="The Station">
@@ -312,6 +465,13 @@ function openAgent(){
 }
 document.querySelectorAll('#openAgent,.avatar').forEach(el=>el.addEventListener('click',openAgent));
 document.querySelectorAll('.avatar').forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openAgent();}}));
+// resume: expand / collapse
+(function(){const r=document.getElementById('resume'),t=document.getElementById('resumeToggle'),c=document.getElementById('resumeCollapse'); if(!r||!t) return;
+  function set(open){r.classList.toggle('open',open); t.setAttribute('aria-expanded',open); t.querySelector('.rt-hint').textContent=open?'Collapse':'Expand';}
+  t.addEventListener('click',()=>set(!r.classList.contains('open')));
+  c&&c.addEventListener('click',()=>{set(false); r.scrollIntoView({behavior:'smooth',block:'start'});});
+  if(location.hash==='#resume') set(true);
+})();
 // card glare + play only on screen
 document.querySelectorAll('.card').forEach(c=>c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect();const g=c.querySelector('.glare');g.style.left=(e.clientX-r.left)+'px';g.style.top=(e.clientY-r.top)+'px'}));
 if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(x=>{const v=x.target;x.isIntersecting?v.play().catch(()=>{}):v.pause()}),{threshold:.15});document.querySelectorAll('video').forEach(v=>io.observe(v));}
