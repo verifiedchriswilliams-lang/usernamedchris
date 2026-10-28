@@ -30,13 +30,10 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 .intro{position:absolute;inset:0;z-index:5;background:#000;transition:opacity .9s ease}
 .intro video{width:100%;height:100%;object-fit:cover;display:block}
 .intro.done{opacity:0;pointer-events:none}
-/* power-on gate: shown only when the browser refuses to autoplay with sound (iPhone, mostly) */
-.poweron{position:absolute;inset:0;display:grid;place-content:center;gap:16px;justify-items:center;border:0;background:#000;color:var(--warm);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.poweron[hidden]{display:none}
-.poweron .pw{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#2a2724,#0b0a09 70%);box-shadow:0 0 0 2px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 10px 24px rgba(0,0,0,.7);animation:pw 2.4s ease-in-out infinite}
-.poweron .pw svg{width:30px;height:30px;filter:drop-shadow(0 0 6px rgba(243,217,166,.6))}
-.poweron .pl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.8}
-@keyframes pw{0%,100%{box-shadow:0 0 0 2px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 10px 24px rgba(0,0,0,.7)}50%{box-shadow:0 0 0 2px rgba(243,217,166,.5),0 0 24px rgba(243,217,166,.35),inset 0 1px 0 rgba(255,255,255,.18),0 10px 24px rgba(0,0,0,.7)}}
+/* the tap target sits exactly on the rendered play button in the first frame */
+.introtap{position:absolute;left:40.19%;top:83.26%;width:19.26%;aspect-ratio:1;border-radius:50%;border:0;padding:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 0 0 0 rgba(243,217,166,0);animation:invite 2.4s ease-in-out infinite;transition:opacity .3s}
+.introtap.gone{opacity:0;pointer-events:none;animation:none}
+@keyframes invite{0%,100%{box-shadow:0 0 0 0 rgba(243,217,166,.0)}50%{box-shadow:0 0 0 6px rgba(243,217,166,.22),0 0 30px rgba(243,217,166,.35)}}
 /* UI layer, hidden until the intro is over */
 .ui{position:absolute;inset:0;z-index:3;opacity:0;transition:opacity .8s ease .2s}
 .ui.on{opacity:1}
@@ -134,8 +131,8 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
     </div>
 
     <div class="intro" id="intro">
-      <video id="introVid" playsinline preload="auto" src="../media/elevenradio-intro.mp4?v=2"></video>
-      <button class="poweron" id="powerOn" type="button" hidden><span class="pw"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M6.6 6.6a8 8 0 1 0 10.8 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></span><span class="pl">Tap to power on</span></button>
+      <video id="introVid" playsinline preload="auto" poster="../media/elevenradio-first.jpg" src="../media/elevenradio-intro.mp4?v=2"></video>
+      <button class="introtap" id="introTap" type="button" aria-label="Power on ElevenRadio"></button>
     </div>
   </div>
 </div>
@@ -158,24 +155,21 @@ const el={cover:$('cover'),st:$('st'),ti:$('ti'),tiWrap:$('tiWrap'),ar:$('ar'),b
 const pane=$('pane'); const sizePane=()=>pane.style.setProperty('--ph',pane.clientHeight+'px'); sizePane(); addEventListener('resize',sizePane); new ResizeObserver(sizePane).observe(pane);
 // ===== intro =====
 function endIntro(){ intro.classList.add('done'); ui.classList.add('on'); }
-// The intro carries the station's welcome sound, so it must play WITH audio. Browsers allow that on load only
-// after the person has interacted with the site (Chrome) or never (iPhone), so: try with sound; if refused,
-// show a power button and play on the tap. Never play it silently.
-let gestureUnlocked=false, attached=false;
+// One tap does everything: the page opens on the intro's first frame (play button lit). Tapping the radio's
+// play button starts the intro with sound, unlocks the stream, and when the intro ends the station starts.
+let attached=false;
 (function(){
   const seen = sessionStorage.getItem('er-intro');
   if(!INTRO_EVERY_VISIT && seen){ endIntro(); return; }
-  const gate=document.getElementById('powerOn');
-  let started=false, failsafe=null;
-  vid.addEventListener('ended',()=>{ sessionStorage.setItem('er-intro','1'); endIntro(); if(gestureUnlocked) play(); });
-  vid.addEventListener('error',endIntro);
-  vid.addEventListener('playing',()=>{ started=true; gate.hidden=true; clearTimeout(failsafe); failsafe=setTimeout(()=>{ if(!intro.classList.contains('done')) endIntro(); },9000); });
-  vid.muted=false; vid.volume=1;
-  const attempt=vid.play();
-  if(attempt&&attempt.catch){ attempt.catch(()=>{ gate.hidden=false; }); }
-  gate.addEventListener('click',()=>{ gestureUnlocked=true; vid.muted=false; vid.currentTime=0; vid.play().catch(endIntro);
-    // use the tap to unlock the stream element too, so the station can start by itself when the intro ends
-    try{ attach().then(()=>{ const p=audio.play(); if(p&&p.then) p.then(()=>audio.pause()).catch(()=>{}); attached=true; }); }catch(e){}
+  const tap=document.getElementById('introTap');
+  let failsafe=null;
+  vid.addEventListener('ended',()=>{ sessionStorage.setItem('er-intro','1'); endIntro(); play(); });
+  vid.addEventListener('error',()=>{ endIntro(); play(); });
+  vid.addEventListener('playing',()=>{ tap.classList.add('gone'); clearTimeout(failsafe); failsafe=setTimeout(()=>{ if(!intro.classList.contains('done')){ endIntro(); play(); } },9000); });
+  tap.addEventListener('click',()=>{
+    vid.muted=false; vid.volume=1; vid.play().catch(()=>{ endIntro(); play(); });
+    // use this same tap to unlock the stream element so the station can start by itself after the intro
+    attach().then(()=>{ attached=true; const p=audio.play(); if(p&&p.then) p.then(()=>audio.pause()).catch(()=>{}); }).catch(()=>{});
   });
 })();
 
