@@ -185,7 +185,7 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
     </div>
   </div>
 </div>
-<audio id="audio" preload="none" playsinline crossorigin="anonymous"></audio>
+<audio id="audio" preload="none" playsinline crossorigin="anonymous" disableremoteplayback x-webkit-airplay="deny"></audio>
 <span class="sr" id="srNow"></span>
 
 <script>
@@ -402,6 +402,11 @@ async function endCall(fromRemote){
 el.req.addEventListener('click',startCall);
 $('endCall').addEventListener('click',()=>endCall(false));
 addEventListener('pagehide',()=>{ if(convo) convo.endSession().catch(()=>{}); });
+// ===== diagnostics: add ?debug=1 to the URL =====
+if(/[?&]debug=1/.test(location.search)){ const d=document.createElement('pre'); d.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99;margin:0;padding:8px 10px;background:rgba(0,0,0,.75);color:#9f9;font:11px/1.4 monospace;border-radius:8px;pointer-events:none;white-space:pre-wrap;max-width:60vw'; document.body.appendChild(d);
+  setInterval(()=>{ let sum=0; if(analyser){ analyser.getByteFrequencyData(fft); for(let i=0;i<fft.length;i++) sum+=fft[i]; }
+    d.textContent=`path: ${hls?'hls.js':(isNative?'native HLS':'none')}\nMMS: ${'ManagedMediaSource' in window} MSE: ${'MediaSource' in window}\nhls.isSupported: ${window.Hls?Hls.isSupported():'(not loaded)'}\nctx: ${actx?actx.state:'none'} gain: ${gain?gain.gain.value.toFixed(2):'none'}\nanalyser energy: ${sum}\nplaying: ${!audio.paused} t=${audio.currentTime.toFixed(1)} vol=${vol.toFixed(2)}\nerr: ${window._lastErr||''}`; },500);
+  addEventListener('error',e=>{ window._lastErr=e.message; }); const w=console.warn; console.warn=(...a)=>{ window._lastErr=a.map(String).join(' ').slice(0,120); w(...a); }; }
 // ===== media session controls (lock screen / Dynamic Island) =====
 if('mediaSession' in navigator){
   navigator.mediaSession.setActionHandler('play',play);
