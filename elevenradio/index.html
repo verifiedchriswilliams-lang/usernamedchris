@@ -33,6 +33,11 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 /* the tap target sits exactly on the rendered play button in the first frame */
 .introtap{position:absolute;left:40.19%;top:83.26%;width:19.26%;aspect-ratio:1;border-radius:50%;border:0;padding:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 0 0 0 rgba(243,217,166,0);animation:invite 2.4s ease-in-out infinite;transition:opacity .3s}
 .introtap.gone{opacity:0;pointer-events:none;animation:none}
+/* the first frame sits over the video as an image, so there is no poster swap and no flash when playback begins */
+.intro .still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;transition:opacity .25s linear}
+.intro .still.gone{opacity:0}
+.intro .hint.tap{bottom:3.2%;color:rgba(243,217,166,.75);transition:opacity .3s}
+.intro .hint.tap.gone{opacity:0}
 @keyframes invite{0%,100%{box-shadow:0 0 0 0 rgba(243,217,166,.0)}50%{box-shadow:0 0 0 6px rgba(243,217,166,.22),0 0 30px rgba(243,217,166,.35)}}
 /* UI layer, hidden until the intro is over */
 .ui{position:absolute;inset:0;z-index:3;opacity:0;transition:opacity .8s ease .2s}
@@ -164,12 +169,14 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
     </div>
 
     <div class="intro" id="intro">
-      <video id="introVid" playsinline preload="auto" poster="../media/elevenradio-first.jpg" src="../media/elevenradio-intro.mp4?v=2"></video>
+      <video id="introVid" playsinline preload="auto" src="../media/elevenradio-intro.mp4?v=2"></video>
+      <img class="still" id="still" src="../media/elevenradio-first.jpg" alt="" width="1080" height="1918">
       <button class="introtap" id="introTap" type="button" aria-label="Power on ElevenRadio"></button>
+      <div class="hint tap" id="tapHint">Tap play</div>
     </div>
   </div>
 </div>
-<audio id="audio" preload="none" playsinline></audio>
+<audio id="audio" preload="none" playsinline crossorigin="anonymous"></audio>
 <span class="sr" id="srNow"></span>
 
 <script>
@@ -179,7 +186,7 @@ const STATION = 'ElevenRadio';
 const TAGLINE = 'Different Here';
 const INTRO_EVERY_VISIT = true;
 const KIP_AGENT_ID = 'agent_4201m4511hnzebhrexm3pjhq48fc'; // Kip: Keep It Playing
-const DUCK_LEVEL = 0.12; // station volume during a call (desktop/Android); iPhone pauses instead
+const DUCK_LEVEL = 0.3; // station level during a call, everywhere (iPhone included, via Web Audio)
 
 // ===== elements =====
 const body=document.body, audio=document.getElementById('audio'), ui=document.getElementById('ui'), intro=document.getElementById('intro'), vid=document.getElementById('introVid');
@@ -200,9 +207,13 @@ let attached=false;
   let failsafe=null;
   vid.addEventListener('ended',()=>{ sessionStorage.setItem('er-intro','1'); endIntro(); play(); });
   vid.addEventListener('error',()=>{ endIntro(); play(); });
+  const still=document.getElementById('still'), hint=document.getElementById('tapHint');
+  const reveal=()=>{ still.classList.add('gone'); hint.classList.add('gone'); };
+  vid.addEventListener('timeupdate',function tu(){ if(vid.currentTime>0.04){ reveal(); vid.removeEventListener('timeupdate',tu); } });
   vid.addEventListener('playing',()=>{ tap.classList.add('gone'); clearTimeout(failsafe); failsafe=setTimeout(()=>{ if(!intro.classList.contains('done')){ endIntro(); play(); } },9000); });
   tap.addEventListener('click',()=>{
     vid.muted=false; vid.volume=1; vid.play().catch(()=>{ endIntro(); play(); });
+    ensureGraph(); resumeGraph();
     // use this same tap to unlock the stream element so the station can start by itself after the intro
     attach().then(()=>{ attached=true; const p=audio.play(); if(p&&p.then) p.then(()=>audio.pause()).catch(()=>{}); }).catch(()=>{});
   });
@@ -210,6 +221,12 @@ let attached=false;
 
 // ===== playback: native HLS on Safari/iOS, hls.js elsewhere =====
 const isNative = audio.canPlayType('application/vnd.apple.mpegurl') !== '';
+// iOS ignores audio.volume, so on iOS the stream runs through a Web Audio gain node, which it does honor
+const iOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+let actx=null, gain=null;
+function ensureGraph(){ if(!iOS||gain) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); const src=actx.createMediaElementSource(audio); gain=actx.createGain(); gain.gain.value=1; src.connect(gain).connect(actx.destination); }catch(e){ console.warn('web audio',e); } }
+function resumeGraph(){ if(actx&&actx.state!=='running') actx.resume().catch(()=>{}); }
+function setLevel(v,ramp){ if(gain){ const t=actx.currentTime; gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value,t); gain.gain.linearRampToValueAtTime(v,t+(ramp||0)); } else { try{ audio.volume=v; }catch(e){} } }
 let hls=null, hlsReady=false;
 function attach(){
   if(isNative){ audio.src=STREAM; return Promise.resolve(); }
@@ -223,6 +240,7 @@ function attach(){
 }
 async function play(){
   if(!attached){ await attach(); attached=true; }
+  ensureGraph(); resumeGraph();
   try{ await audio.play(); }catch(e){ console.warn(e); }
 }
 function pause(){ audio.pause(); }
@@ -297,13 +315,10 @@ function fitTitle(){ const w=el.tiWrap, t=el.ti; const gen=++crawlGen; clearTime
 addEventListener('resize',fitTitle);
 // request line: placeholder until the Kip agent is wired in
 // ===== Request line: a live call with Kip, inside the pane =====
-const iOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 let convo=null, callActive=false, wasPlaying=false, lvlTimer=null;
 const how=$('how'), orb=$('orb'), lvl=$('lvl');
 function loadSdk(){ return window.ElevenLabsClient?Promise.resolve():new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src='https://cdn.jsdelivr.net/npm/@elevenlabs/client@1.32.0/dist/lib.iife.js'; sc.onload=res; sc.onerror=rej; document.head.appendChild(sc); }); }
-function duck(on){ if(iOS){ if(on){ wasPlaying=!audio.paused; if(wasPlaying) audio.pause(); } else if(wasPlaying) play(); return; }
-  const target=on?Math.min(vol,DUCK_LEVEL):vol; const from=audio.volume; const t0=performance.now();
-  (function step(){ const k=Math.min(1,(performance.now()-t0)/500); try{ audio.volume=from+(target-from)*k; }catch(e){} if(k<1) requestAnimationFrame(step); })(); }
+function duck(on){ ensureGraph(); resumeGraph(); setLevel(on?Math.min(vol,DUCK_LEVEL):vol, .5); }
 function setHow(t,cls){ how.textContent=t; orb.className='orb'+(cls?' '+cls:''); }
 async function startCall(){
   if(callActive) return; callActive=true; body.classList.add('oncall'); setHow('Connecting');
@@ -340,7 +355,7 @@ if('mediaSession' in navigator){
 
 // ===== volume knob (iOS ignores software volume, so it hides there) =====
 // the rendered indicator points straight up, which we call 50%: the disc turns -135° (silent) to +135° (full)
-let vol=0.5; const setVol=v=>{ vol=Math.max(0,Math.min(1,v)); try{ audio.volume=vol; }catch(e){} el.knob.style.setProperty('--deg',(-135+vol*270)+'deg'); el.knob.setAttribute('aria-valuenow',Math.round(vol*100)); };
+let vol=0.5; const setVol=v=>{ vol=Math.max(0,Math.min(1,v)); if(!callActive) setLevel(vol,0); el.knob.style.setProperty('--deg',(-135+vol*270)+'deg'); el.knob.setAttribute('aria-valuenow',Math.round(vol*100)); };
 setVol(vol);
 let drag=null;
 const angleAt=e=>{ const r=el.knob.getBoundingClientRect(); return Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2))*180/Math.PI; };
