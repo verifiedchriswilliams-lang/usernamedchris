@@ -80,6 +80,29 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 .pane .ti.crawl span{display:inline-block;padding-right:.4em}
 
 @keyframes blink{50%{opacity:.25}}
+/* call mode: the pane flips from now-playing to the line with Kip */
+.pane .np{display:contents}
+.pane .call{display:none;flex:1;min-width:0;align-items:center;gap:calc(var(--ph,100px)*.12)}
+.oncall .pane .np{display:none}
+.oncall .pane .call{display:flex}
+.call .orb{flex:0 0 auto;width:calc(var(--ph,100px)*.7);height:calc(var(--ph,100px)*.7);border-radius:50%;position:relative;background:radial-gradient(circle at 50% 40%,#2a2724,#0b0a09 70%);box-shadow:0 0 0 1px rgba(243,217,166,.45),inset 0 1px 0 rgba(255,255,255,.12);display:grid;place-items:center}
+.call .orb:before{content:"";position:absolute;inset:-6%;border-radius:50%;border:2px solid rgba(243,217,166,.6);opacity:0;transform:scale(1)}
+.call .orb.speaking:before{animation:ring 1.4s ease-out infinite}
+.call .orb.listening{box-shadow:0 0 0 1px rgba(243,217,166,.9),0 0 14px rgba(243,217,166,.35),inset 0 1px 0 rgba(255,255,255,.12)}
+@keyframes ring{0%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(1.35)}}
+.call .orb i{display:block;width:40%;height:52%;border-left:.22em solid var(--warm);border-right:.22em solid var(--warm);box-sizing:border-box;filter:drop-shadow(0 0 4px rgba(243,217,166,.7))}
+.call .ctxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:calc(var(--ph,100px)*.03)}
+.call .who{font-weight:700;font-size:clamp(12px,calc(var(--ph,100px)*.17),20px);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.call .how{font-family:var(--mono);font-size:clamp(8px,calc(var(--ph,100px)*.1),12px);letter-spacing:.12em;text-transform:uppercase;color:var(--warm);opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.call .lvl{height:3px;width:60%;max-width:140px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:calc(var(--ph,100px)*.02)}
+.call .lvl b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--blue));transition:width .12s}
+.call .end{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:calc(var(--ph,100px)*.05);border:0;background:none;color:#ff6b5e;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.call .end .c{width:calc(var(--ph,100px)*.38);height:calc(var(--ph,100px)*.38);border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#3a1612,#120605 70%);box-shadow:0 0 0 1px rgba(255,107,94,.6),inset 0 1px 0 rgba(255,255,255,.1)}
+.call .end svg{width:52%;height:52%;fill:none;stroke:#ff6b5e;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transform:rotate(135deg)}
+.call .end span{font-family:var(--mono);font-size:clamp(6px,calc(var(--ph,100px)*.075),9px);letter-spacing:.14em;text-transform:uppercase;line-height:1.2;opacity:.9}
+/* while on the line with Kip, the glyph breathes white instead of red/blue */
+.oncall .glow{opacity:1;animation:breathe 2.2s ease-in-out infinite;background:radial-gradient(45% 60% at 50% 50%,rgba(243,217,166,.6),transparent 70%)}
+.oncall .off{background:rgba(0,0,0,.0)}
 /* progress hairline under the pane text */
 .bar{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.08)}
 .bar b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--blue));transition:width 1s linear}
@@ -117,6 +140,7 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 
     <div class="ui" id="ui">
       <div class="pane" id="pane" aria-live="polite">
+        <div class="np">
         <div class="cover fallback" id="cover"></div>
         <div class="txt">
           <div class="st"><i aria-hidden="true"></i><span id="st">ElevenRadio</span></div>
@@ -124,6 +148,12 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
           <div class="ar" id="ar">Tap play to tune in</div>
         </div>
         <button class="req" id="req" type="button" aria-label="Request line: call Kip"><span class="c"><svg viewBox="0 0 24 24"><path d="M5.5 3h3l1.6 4-2 1.3a11 11 0 0 0 6.6 6.6l1.3-2 4 1.6v3a2 2 0 0 1-2 2A15.5 15.5 0 0 1 3.5 5a2 2 0 0 1 2-2z"/><path d="M15 3.5a6 6 0 0 1 5.5 5.5M15 7a2.5 2.5 0 0 1 2 2"/></svg></span><span>Request<br>line</span></button>
+        </div>
+        <div class="call" id="call">
+          <div class="orb" id="orb"><i></i></div>
+          <div class="ctxt"><div class="who">Kip · Request line</div><div class="how" id="how">Connecting</div><div class="lvl"><b id="lvl"></b></div></div>
+          <button class="end" id="endCall" type="button" aria-label="Hang up"><span class="c"><svg viewBox="0 0 24 24"><path d="M5.5 3h3l1.6 4-2 1.3a11 11 0 0 0 6.6 6.6l1.3-2 4 1.6v3a2 2 0 0 1-2 2A15.5 15.5 0 0 1 3.5 5a2 2 0 0 1 2-2z"/></svg></span><span>Hang up</span></button>
+        </div>
         <div class="bar"><b id="bar"></b></div>
       </div>
 
@@ -148,6 +178,8 @@ const STREAM = 'https://shflab.superhifi.radio/halloween/playlist.m3u8'; // swap
 const STATION = 'ElevenRadio';
 const TAGLINE = 'Different Here';
 const INTRO_EVERY_VISIT = true;
+const KIP_AGENT_ID = 'agent_4201m4511hnzebhrexm3pjhq48fc'; // Kip: Keep It Playing
+const DUCK_LEVEL = 0.12; // station volume during a call (desktop/Android); iPhone pauses instead
 
 // ===== elements =====
 const body=document.body, audio=document.getElementById('audio'), ui=document.getElementById('ui'), intro=document.getElementById('intro'), vid=document.getElementById('introVid');
@@ -211,7 +243,7 @@ function applyMeta(m){
   else { el.cover.style.backgroundImage=''; el.cover.classList.add('fallback'); }
   $('srNow').textContent=`Now playing ${c.title} by ${c.artist}`;
   document.title=`${c.title} · ${c.artist} · ${STATION}`;
-  if('mediaSession' in navigator){
+  if('mediaSession' in navigator && !callActive){
     navigator.mediaSession.metadata=new MediaMetadata({title:c.title||STATION,artist:c.artist||'',album:STATION,artwork:c.image?[{src:c.image,sizes:'512x512',type:'image/jpeg'}]:[]});
   }
   tick(c);
@@ -264,7 +296,41 @@ function fitTitle(){ const w=el.tiWrap, t=el.ti; const gen=++crawlGen; clearTime
     crawlTimer=setTimeout(go,3000); }); }
 addEventListener('resize',fitTitle);
 // request line: placeholder until the Kip agent is wired in
-el.req.addEventListener('click',()=>{ el.req.classList.toggle('on'); });
+// ===== Request line: a live call with Kip, inside the pane =====
+const iOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+let convo=null, callActive=false, wasPlaying=false, lvlTimer=null;
+const how=$('how'), orb=$('orb'), lvl=$('lvl');
+function loadSdk(){ return window.ElevenLabsClient?Promise.resolve():new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src='https://cdn.jsdelivr.net/npm/@elevenlabs/client@1.32.0/dist/lib.iife.js'; sc.onload=res; sc.onerror=rej; document.head.appendChild(sc); }); }
+function duck(on){ if(iOS){ if(on){ wasPlaying=!audio.paused; if(wasPlaying) audio.pause(); } else if(wasPlaying) play(); return; }
+  const target=on?Math.min(vol,DUCK_LEVEL):vol; const from=audio.volume; const t0=performance.now();
+  (function step(){ const k=Math.min(1,(performance.now()-t0)/500); try{ audio.volume=from+(target-from)*k; }catch(e){} if(k<1) requestAnimationFrame(step); })(); }
+function setHow(t,cls){ how.textContent=t; orb.className='orb'+(cls?' '+cls:''); }
+async function startCall(){
+  if(callActive) return; callActive=true; body.classList.add('oncall'); setHow('Connecting');
+  // keep the stream's media element alive on iOS before we take the mic
+  duck(true);
+  try{
+    await loadSdk();
+    await navigator.mediaDevices.getUserMedia({audio:true});
+    convo=await ElevenLabsClient.Conversation.startSession({
+      agentId:KIP_AGENT_ID, connectionType:'websocket',
+      onConnect:()=>{ setHow('On the line','listening'); lvlTimer=setInterval(()=>{ try{ const v=convo.getOutputVolume?convo.getOutputVolume():0; const u=convo.getInputVolume?convo.getInputVolume():0; lvl.style.width=Math.round(Math.max(v,u)*100)+'%'; }catch(e){} },100); },
+      onModeChange:m=>{ setHow(m.mode==='speaking'?'Kip is talking':'Listening', m.mode==='speaking'?'speaking':'listening'); },
+      onDisconnect:()=>endCall(true),
+      onError:(msg)=>{ console.warn('kip',msg); setHow('Line dropped'); setTimeout(()=>endCall(true),1200); },
+    });
+    if('mediaSession' in navigator) navigator.mediaSession.metadata=new MediaMetadata({title:'On the line with Kip',artist:STATION,album:STATION});
+  }catch(e){ console.warn('call failed',e); setHow(/NotAllowed|Permission/i.test(String(e))?'Mic blocked':'Could not connect'); setTimeout(()=>endCall(true),1600); }
+}
+async function endCall(fromRemote){
+  if(!callActive) return; callActive=false; clearInterval(lvlTimer); lvl.style.width='0';
+  try{ if(convo && !fromRemote) await convo.endSession(); }catch(e){} convo=null;
+  body.classList.remove('oncall'); duck(false);
+  if(current) applyMeta({current}); else if('mediaSession' in navigator) navigator.mediaSession.metadata=new MediaMetadata({title:TAGLINE,artist:STATION,album:STATION});
+}
+el.req.addEventListener('click',startCall);
+$('endCall').addEventListener('click',()=>endCall(false));
+addEventListener('pagehide',()=>{ if(convo) convo.endSession().catch(()=>{}); });
 // ===== media session controls (lock screen / Dynamic Island) =====
 if('mediaSession' in navigator){
   navigator.mediaSession.setActionHandler('play',play);
