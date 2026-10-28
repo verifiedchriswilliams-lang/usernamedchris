@@ -245,6 +245,7 @@ function startViz(){ if(vizOn) return; vizOn=true; let last=performance.now();
     if(analyser && !audio.paused && !document.hidden){ analyser.getByteFrequencyData(fft); let sum=0; for(let i=1;i<9;i++) sum+=fft[i]; const bass=sum/8/255; if(sum>0){ heard++; graphLive=true; silentFrames=0; } else if(audio.currentTime>3) silentFrames++;
       // adaptive floor so quiet songs still breathe and loud songs don't peg
       floor+= (bass-floor)*dt*.4; target=Math.max(0,Math.min(1,(bass-floor)*3.2)); }
+    if(!graphLive && !audio.paused) target=.18+.14*Math.sin(now/1000*2.1);   // no signal reaching us: slow breath instead of a dead light
     beat += (target-beat)*(target>beat? .55 : dt*6);   // fast attack, slow release
     // slow hue drift: warm pool wanders red to orange to pink, cool pool blue to violet to teal, each on its own clock
     const t=now/1000; const h1=4+Math.sin(t/23)*18+Math.sin(t/7.3)*6; const h2=232+Math.sin(t/31+1)*34+Math.sin(t/9.1)*8;
@@ -252,7 +253,9 @@ function startViz(){ if(vizOn) return; vizOn=true; let last=performance.now();
   })(last); }
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden) resumeGraph(); });
 function resumeGraph(){ if(actx&&actx.state!=='running') actx.resume().catch(()=>{}); }
-audio.addEventListener('play',()=>{ ensureGraph(); resumeGraph(); });
+audio.addEventListener('play',()=>{ ensureGraph(); resumeGraph(); startViz(); });
+// the color drift runs whenever the station is on, with or without an audio graph; only the pulse needs the analyser
+startViz();
 function setLevel(v,ramp){ if(gain){ const t=actx.currentTime; gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value,t); gain.gain.linearRampToValueAtTime(v,t+(ramp||0)); } else { try{ audio.volume=v; }catch(e){} } }
 let hls=null, hlsReady=false;
 function useNative(){ isNative=true; audio.src=STREAM; }
