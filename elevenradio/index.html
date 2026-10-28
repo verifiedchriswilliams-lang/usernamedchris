@@ -44,17 +44,32 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 /* the tuning window becomes the now-playing pane */
 .pane{position:absolute;left:8%;top:14.2%;width:84%;height:14.3%;display:flex;align-items:center;gap:calc(var(--ph,100px)*.14);padding:0 calc(var(--ph,100px)*.12);color:#F2EEE8;overflow:hidden;border-radius:6px;
   background:radial-gradient(120% 140% at 50% 0%,#17171a 0,#09090a 60%,#050506 100%);box-shadow:inset 0 2px 10px rgba(0,0,0,.9),inset 0 0 0 1px rgba(255,255,255,.05)}
-.pane:before{content:"";position:absolute;left:50%;top:7%;width:3.2%;height:6%;margin-left:-1.6%;border-radius:2px;background:#ff2a1f;box-shadow:0 0 10px #ff3a2a,0 0 22px rgba(255,60,40,.6)}
+.pane:before{content:"";position:absolute;left:50%;top:7%;width:3.2%;height:6%;margin-left:-1.6%;border-radius:2px;background:#ff2a1f;box-shadow:0 0 10px #ff3a2a,0 0 22px rgba(255,60,40,.6);animation:led 3.2s ease-in-out infinite}
+.idle .pane:before{animation-duration:5s}
+@keyframes led{0%,100%{opacity:.55;box-shadow:0 0 6px #ff3a2a,0 0 14px rgba(255,60,40,.35)}50%{opacity:1;box-shadow:0 0 12px #ff3a2a,0 0 30px rgba(255,60,40,.75),0 0 60px rgba(255,60,40,.35)}}
+/* the LED's reflection on the chrome bezel above the pane */
+.ledwash{position:absolute;left:38%;top:9.5%;width:24%;height:8%;pointer-events:none;mix-blend-mode:screen;filter:blur(10px);background:radial-gradient(50% 70% at 50% 100%,rgba(255,70,50,.75),rgba(255,70,50,.2) 50%,transparent 75%);animation:ledwash 3.2s ease-in-out infinite}
+.idle .ledwash{animation-duration:5s}
+@keyframes ledwash{0%,100%{opacity:.35}50%{opacity:1}}
 .pane:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.07),transparent 35%);pointer-events:none}
 .pane .cover{flex:0 0 auto;width:calc(var(--ph,100px)*.7);height:calc(var(--ph,100px)*.7);border-radius:12%;background:#111 center/cover no-repeat;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 6px 18px rgba(0,0,0,.6);display:grid;place-items:center;overflow:hidden}
 .pane .cover.fallback:before{content:"";width:46%;height:60%;border-left:6px solid var(--red);border-right:6px solid var(--blue);box-sizing:border-box;filter:drop-shadow(0 0 8px rgba(255,120,100,.8))}
 .pane .txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:calc(var(--ph,100px)*.02);line-height:1.2;padding-top:calc(var(--ph,100px)*.06)}
 .pane .st{font-family:var(--mono);font-size:clamp(8px,calc(var(--ph,100px)*.1),12px);letter-spacing:.14em;text-transform:uppercase;color:var(--warm);opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pane .ti{font-weight:700;font-size:clamp(12px,calc(var(--ph,100px)*.17),20px);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pane .ti{font-weight:700;text-overflow:clip;font-size:clamp(12px,calc(var(--ph,100px)*.17),20px);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pane .ar{font-size:clamp(10px,calc(var(--ph,100px)*.13),15px);color:rgba(242,238,232,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pane .state{flex:0 0 auto;font-family:var(--mono);font-size:clamp(8px,calc(var(--ph,100px)*.1),12px);color:var(--warm);opacity:.85;letter-spacing:.1em}
-.pane .state i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#FF2F2F;box-shadow:0 0 8px #FF2F2F;margin-right:6px;vertical-align:middle;animation:blink 1.4s infinite}
-.idle .pane .state i{animation:none;opacity:.35;box-shadow:none}
+/* request line: mic glyph with a two-line mono label, sits where LIVE used to */
+.req{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:calc(var(--ph,100px)*.04);padding:calc(var(--ph,100px)*.07) calc(var(--ph,100px)*.09);border-radius:calc(var(--ph,100px)*.1);border:1px solid rgba(243,217,166,.28);background:rgba(255,255,255,.03);color:var(--warm);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .2s,border-color .2s}
+.req:hover,.req:focus-visible{background:rgba(243,217,166,.1);border-color:rgba(243,217,166,.6);outline:none}
+.req svg{width:calc(var(--ph,100px)*.2);height:calc(var(--ph,100px)*.2);fill:none;stroke:var(--warm);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px rgba(243,217,166,.5))}
+.req span{font-family:var(--mono);font-size:clamp(6px,calc(var(--ph,100px)*.075),9px);letter-spacing:.14em;text-transform:uppercase;line-height:1.15;text-align:center;opacity:.9}
+/* the 11 glyph beside the station name */
+.pane .st{display:flex;align-items:center;gap:.45em}
+.pane .st i{display:inline-block;width:.55em;height:.85em;border-left:.22em solid var(--warm);border-right:.22em solid var(--warm);box-sizing:border-box;filter:drop-shadow(0 0 3px rgba(243,217,166,.7))}
+/* long titles: sit for 3 seconds, then crawl */
+.pane .ti{position:relative;overflow:hidden}
+.pane .ti span{display:inline-block;white-space:nowrap;will-change:transform;padding-right:.4em}
+
 @keyframes blink{50%{opacity:.25}}
 /* progress hairline under the pane text */
 .bar{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.08)}
@@ -79,7 +94,7 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 .hint{position:absolute;left:0;right:0;bottom:3.2%;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);pointer-events:none;transition:opacity .6s}
 .playing .hint{opacity:0}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-@media (prefers-reduced-motion:reduce){.glow,.pane .state i{animation:none}}
+@media (prefers-reduced-motion:reduce){.glow,.pane:before,.ledwash,.pane .ti.crawl span{animation:none}}
 </style>
 </head>
 <body class="idle">
@@ -89,16 +104,17 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
     <img class="art" src="../media/elevenradio-radio.jpg" alt="ElevenRadio transistor radio" width="1080" height="1918">
     <div class="off"></div>
     <div class="glow"></div>
+    <div class="ledwash"></div>
 
     <div class="ui" id="ui">
       <div class="pane" id="pane" aria-live="polite">
         <div class="cover fallback" id="cover"></div>
         <div class="txt">
-          <div class="st" id="st">ElevenRadio</div>
-          <div class="ti" id="ti">Different Here</div>
+          <div class="st"><i aria-hidden="true"></i><span id="st">ElevenRadio</span></div>
+          <div class="ti" id="tiWrap"><span id="ti">Different Here</span></div>
           <div class="ar" id="ar">Tap play to tune in</div>
         </div>
-        <div class="state" id="state"><i></i>LIVE</div>
+        <button class="req" id="req" type="button" aria-label="Request line: talk to Kip"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg><span>Request<br>line</span></button>
         <div class="bar"><b id="bar"></b></div>
       </div>
 
@@ -129,7 +145,7 @@ const INTRO_EVERY_VISIT = true;
 // ===== elements =====
 const body=document.body, audio=document.getElementById('audio'), ui=document.getElementById('ui'), intro=document.getElementById('intro'), vid=document.getElementById('introVid');
 const $=id=>document.getElementById(id);
-const el={cover:$('cover'),st:$('st'),ti:$('ti'),ar:$('ar'),bar:$('bar'),play:$('play'),knob:$('knob'),state:$('state')};
+const el={cover:$('cover'),st:$('st'),ti:$('ti'),tiWrap:$('tiWrap'),ar:$('ar'),bar:$('bar'),play:$('play'),knob:$('knob'),req:$('req')};
 
 // pane height drives the type and art sizes inside it (works the same in Safari and Chrome)
 const pane=$('pane'); const sizePane=()=>pane.style.setProperty('--ph',pane.clientHeight+'px'); sizePane(); addEventListener('resize',sizePane); new ResizeObserver(sizePane).observe(pane);
@@ -169,8 +185,6 @@ function pause(){ audio.pause(); }
 el.play.addEventListener('click',()=>{ audio.paused?play():pause(); });
 audio.addEventListener('playing',()=>{ body.classList.replace('idle','playing'); el.play.setAttribute('aria-label','Pause'); });
 audio.addEventListener('pause',()=>{ body.classList.replace('playing','idle'); el.play.setAttribute('aria-label','Play'); });
-audio.addEventListener('waiting',()=>{ el.state.innerHTML='<i></i>TUNING'; });
-audio.addEventListener('playing',()=>{ el.state.innerHTML='<i></i>LIVE'; });
 
 // ===== metadata: Super Hi-Fi writes a JSON blob on every #EXTINF line =====
 function parseMeta(title){ try{ return JSON.parse(title); }catch(e){ return null; } }
@@ -180,7 +194,7 @@ function applyMeta(m){
   const c=m.current;
   if(current && current.id===c.id){ tick(c); return; }
   current=c;
-  el.st.textContent=STATION; el.ti.textContent=c.title||TAGLINE; el.ar.textContent=c.artist||'';
+  el.st.textContent=STATION; el.ti.textContent=c.title||TAGLINE; el.ar.textContent=c.artist||''; fitTitle();
   if(c.image){ const im=new Image(); im.onload=()=>{ el.cover.style.backgroundImage=`url("${c.image}")`; el.cover.classList.remove('fallback'); }; im.onerror=()=>{ el.cover.style.backgroundImage=''; el.cover.classList.add('fallback'); }; im.src=c.image; }
   else { el.cover.style.backgroundImage=''; el.cover.classList.add('fallback'); }
   $('srNow').textContent=`Now playing ${c.title} by ${c.artist}`;
@@ -228,6 +242,17 @@ audio.addEventListener('play',startPolling);
 // show what's on even before the first tap
 poll();
 
+// title crawl: if it overflows, hold 3s, scroll to the end, hold, snap back
+let crawlTimer=null, crawlGen=0;
+function fitTitle(){ const w=el.tiWrap, t=el.ti; const gen=++crawlGen; clearTimeout(crawlTimer); t.style.transition='none'; t.style.transform='';
+  requestAnimationFrame(()=>{ const over=t.scrollWidth-w.clientWidth; if(over<=4) return;
+    const dist=over+8, secs=dist/28;
+    const go=()=>{ if(gen!==crawlGen) return; t.style.transition=`transform ${secs}s linear`; t.style.transform=`translateX(${-dist}px)`;
+      crawlTimer=setTimeout(()=>{ if(gen!==crawlGen) return; t.style.transition='none'; t.style.transform=''; crawlTimer=setTimeout(go,3000); }, secs*1000+1500); };
+    crawlTimer=setTimeout(go,3000); }); }
+addEventListener('resize',fitTitle);
+// request line: placeholder until the Kip agent is wired in
+el.req.addEventListener('click',()=>{ el.req.classList.toggle('on'); });
 // ===== media session controls (lock screen / Dynamic Island) =====
 if('mediaSession' in navigator){
   navigator.mediaSession.setActionHandler('play',play);
