@@ -43,10 +43,18 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 .ui{position:absolute;inset:0;z-index:3;opacity:0;transition:opacity .8s ease .2s}
 .ui.on{opacity:1}
 /* glyph glow: pulses while playing, dims when stopped */
-.glow{position:absolute;left:22%;top:40%;width:52%;height:36%;pointer-events:none;border-radius:50%;
-  background:radial-gradient(40% 55% at 31% 50%,rgba(255,80,60,.6),transparent 70%),radial-gradient(40% 55% at 69% 50%,rgba(70,90,255,.6),transparent 70%);
-  filter:blur(26px);mix-blend-mode:screen;opacity:.0;transition:opacity 1.2s ease}
-.playing .glow{opacity:1;animation:breathe 2.8s ease-in-out infinite}
+/* the glyph glow: two color pools that slowly drift in hue and swell with the low end of whatever is playing */
+.glow{position:absolute;left:22%;top:40%;width:52%;height:36%;pointer-events:none;border-radius:50%;--h1:4;--h2:232;--beat:0;--amb:.55;
+  background:radial-gradient(40% 55% at 31% 50%,hsla(var(--h1),100%,62%,.65),transparent 70%),radial-gradient(40% 55% at 69% 50%,hsla(var(--h2),100%,64%,.65),transparent 70%);
+  filter:blur(26px);mix-blend-mode:screen;opacity:0;transition:opacity 1.2s ease;
+  transform:scale(calc(.96 + var(--beat) * .12))}
+.playing .glow{opacity:calc(var(--amb) + var(--beat) * .5)}
+/* a tighter, brighter core that only shows on hits */
+.core{position:absolute;left:30%;top:46%;width:36%;height:24%;pointer-events:none;border-radius:50%;--beat:0;--h1:4;--h2:232;
+  background:radial-gradient(30% 50% at 34% 50%,hsla(var(--h1),100%,80%,.9),transparent 70%),radial-gradient(30% 50% at 66% 50%,hsla(var(--h2),100%,82%,.9),transparent 70%);
+  filter:blur(14px);mix-blend-mode:screen;opacity:0;transform:scale(calc(.9 + var(--beat) * .25))}
+.playing .core{opacity:calc(var(--beat) * .9)}
+.oncall .core{opacity:0}
 .off{position:absolute;left:20%;top:39%;width:56%;height:38%;pointer-events:none;background:rgba(0,0,0,.0);transition:background 1.2s ease}
 .idle .off{background:rgba(0,0,0,.35)}
 @keyframes breathe{0%,100%{opacity:.55;transform:scale(.97)}50%{opacity:1;transform:scale(1.03)}}
@@ -106,7 +114,7 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 .call .end svg{width:52%;height:52%;fill:none;stroke:#ff6b5e;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transform:rotate(135deg)}
 .call .end span{font-family:var(--mono);font-size:clamp(6px,calc(var(--ph,100px)*.075),9px);letter-spacing:.14em;text-transform:uppercase;line-height:1.2;opacity:.9}
 /* while on the line with Kip, the glyph breathes white instead of red/blue */
-.oncall .glow{opacity:1;animation:breathe 2.2s ease-in-out infinite;background:radial-gradient(45% 60% at 50% 50%,rgba(243,217,166,.6),transparent 70%)}
+.oncall .glow{opacity:1;animation:breathe 2.2s ease-in-out infinite;transform:none;background:radial-gradient(45% 60% at 50% 50%,rgba(243,217,166,.6),transparent 70%)}
 .oncall .off{background:rgba(0,0,0,.0)}
 /* progress hairline under the pane text */
 .bar{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.08)}
@@ -131,7 +139,7 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 .hint{position:absolute;left:0;right:0;bottom:3.2%;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);pointer-events:none;transition:opacity .6s}
 .playing .hint{opacity:0}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-@media (prefers-reduced-motion:reduce){.glow,.pane:before,.ledwash,.pane .ti.crawl span{animation:none}}
+@media (prefers-reduced-motion:reduce){.glow,.pane:before,.ledwash,.pane .ti.crawl span{animation:none}.glow,.core{transform:none!important}}
 </style>
 </head>
 <body class="idle">
@@ -140,7 +148,8 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
   <div class="device" id="device">
     <img class="art" src="../media/elevenradio-radio.jpg" alt="ElevenRadio transistor radio" width="1080" height="1918">
     <div class="off"></div>
-    <div class="glow"></div>
+    <div class="glow" id="glow"></div>
+    <div class="core" id="core"></div>
     <div class="ledwash"></div>
 
     <div class="ui" id="ui">
@@ -223,9 +232,26 @@ let attached=false;
 const isNative = audio.canPlayType('application/vnd.apple.mpegurl') !== '';
 // iOS ignores audio.volume, so on iOS the stream runs through a Web Audio gain node, which it does honor
 const iOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-let actx=null, gain=null;
-function ensureGraph(){ if(!iOS||gain) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); const src=actx.createMediaElementSource(audio); gain=actx.createGain(); gain.gain.value=1; src.connect(gain).connect(actx.destination); }catch(e){ console.warn('web audio',e); } }
+let actx=null, gain=null, analyser=null, fft=null;
+function ensureGraph(){ if(gain) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); const src=actx.createMediaElementSource(audio); gain=actx.createGain(); gain.gain.value=1; analyser=actx.createAnalyser(); analyser.fftSize=512; analyser.smoothingTimeConstant=.82; fft=new Uint8Array(analyser.frequencyBinCount); src.connect(gain); gain.connect(analyser); analyser.connect(actx.destination); startViz(); }catch(e){ console.warn('web audio',e); } }
+// ===== the glyph reacts to the music =====
+const glowEl=document.getElementById('glow'), coreEl=document.getElementById('core');
+let vizOn=false, beat=0, floor=0.15;
+function startViz(){ if(vizOn) return; vizOn=true; let last=performance.now();
+  (function frame(now){ if(!vizOn) return; requestAnimationFrame(frame); const dt=Math.min(.05,(now-last)/1000); last=now;
+    // low end: bins ~1..8 cover roughly 40 to 350 Hz at 44.1k/512
+    let target=0;
+    if(analyser && !audio.paused && !document.hidden){ analyser.getByteFrequencyData(fft); let sum=0; for(let i=1;i<9;i++) sum+=fft[i]; const bass=sum/8/255;
+      // adaptive floor so quiet songs still breathe and loud songs don't peg
+      floor+= (bass-floor)*dt*.4; target=Math.max(0,Math.min(1,(bass-floor)*3.2)); }
+    beat += (target-beat)*(target>beat? .55 : dt*6);   // fast attack, slow release
+    // slow hue drift: warm pool wanders red to orange to pink, cool pool blue to violet to teal, each on its own clock
+    const t=now/1000; const h1=4+Math.sin(t/23)*18+Math.sin(t/7.3)*6; const h2=232+Math.sin(t/31+1)*34+Math.sin(t/9.1)*8;
+    for(const el of [glowEl,coreEl]){ el.style.setProperty('--beat',beat.toFixed(3)); el.style.setProperty('--h1',h1.toFixed(1)); el.style.setProperty('--h2',h2.toFixed(1)); }
+  })(last); }
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) resumeGraph(); });
 function resumeGraph(){ if(actx&&actx.state!=='running') actx.resume().catch(()=>{}); }
+audio.addEventListener('play',()=>{ ensureGraph(); resumeGraph(); });
 function setLevel(v,ramp){ if(gain){ const t=actx.currentTime; gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value,t); gain.gain.linearRampToValueAtTime(v,t+(ramp||0)); } else { try{ audio.volume=v; }catch(e){} } }
 let hls=null, hlsReady=false;
 function attach(){
