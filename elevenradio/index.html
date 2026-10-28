@@ -63,7 +63,7 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 .pane .cover.fallback:before{content:"";width:46%;height:60%;border-left:6px solid var(--red);border-right:6px solid var(--blue);box-sizing:border-box;filter:drop-shadow(0 0 8px rgba(255,120,100,.8))}
 .pane .txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:calc(var(--ph,100px)*.02);line-height:1.2;padding-top:calc(var(--ph,100px)*.06)}
 .pane .st{font-family:var(--mono);font-size:clamp(8px,calc(var(--ph,100px)*.1),12px);letter-spacing:.14em;text-transform:uppercase;color:var(--warm);opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pane .ti{font-weight:700;text-overflow:clip;font-size:clamp(12px,calc(var(--ph,100px)*.17),20px);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pane .ti{font-weight:700;text-overflow:ellipsis;font-size:clamp(12px,calc(var(--ph,100px)*.17),20px);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pane .ar{font-size:clamp(10px,calc(var(--ph,100px)*.13),15px);color:rgba(242,238,232,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* request line: mic glyph with a two-line mono label, sits where LIVE used to */
 .req{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:calc(var(--ph,100px)*.04);padding:calc(var(--ph,100px)*.07) calc(var(--ph,100px)*.09);border-radius:calc(var(--ph,100px)*.1);border:1px solid rgba(243,217,166,.28);background:rgba(255,255,255,.03);color:var(--warm);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .2s,border-color .2s}
@@ -75,22 +75,24 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 .pane .st i{display:inline-block;width:.55em;height:.85em;border-left:.22em solid var(--warm);border-right:.22em solid var(--warm);box-sizing:border-box;filter:drop-shadow(0 0 3px rgba(243,217,166,.7))}
 /* long titles: sit for 3 seconds, then crawl */
 .pane .ti{position:relative;overflow:hidden}
-.pane .ti span{display:inline-block;white-space:nowrap;will-change:transform;padding-right:.4em}
+.pane .ti span{display:inline;white-space:nowrap;will-change:transform}
+.pane .ti.crawl{text-overflow:clip;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+.pane .ti.crawl span{display:inline-block;padding-right:.4em}
 
 @keyframes blink{50%{opacity:.25}}
 /* progress hairline under the pane text */
 .bar{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.08)}
 .bar b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--blue));transition:width 1s linear}
 /* play button: sits exactly on the rendered button */
-.play{position:absolute;left:41.5%;top:83.7%;width:17%;aspect-ratio:1;border-radius:50%;border:0;padding:0;cursor:pointer;
-  background:radial-gradient(circle at 50% 40%,#2a2724,#0b0a09 70%);box-shadow:0 0 0 2px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 10px 24px rgba(0,0,0,.7);display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
-.play:active{transform:scale(.96)}
-.play svg{width:38%;height:38%;fill:var(--warm);filter:drop-shadow(0 0 6px rgba(243,217,166,.6))}
-.play .ic-pause{display:none}
-.playing .play .ic-play{display:none}.playing .play .ic-pause{display:block}
+.play{position:absolute;left:40.19%;top:83.26%;width:19.26%;aspect-ratio:1;border-radius:50%;border:0;padding:0;cursor:pointer;background:transparent;-webkit-tap-highlight-color:transparent;transition:transform .12s}
+.play:active{transform:scale(.97)}
+.play:focus-visible{outline:2px solid var(--warm);outline-offset:4px}
+.play img{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .35s;pointer-events:none;-webkit-user-drag:none}
+.playing .play img{opacity:1}
 /* volume knob: invisible hit area with a glowing indicator that rotates */
-.knob{position:absolute;left:71.57%;top:33.68%;width:21.11%;aspect-ratio:1;border-radius:50%;cursor:grab;touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none}
+.knob{position:absolute;left:71.11%;top:33.42%;width:22.04%;aspect-ratio:1;border-radius:50%;cursor:grab;touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none}
 .knob:active{cursor:grabbing}
+.knob:before{content:"";position:absolute;inset:3%;border-radius:50%;background:#141210}
 .knob img{position:absolute;inset:0;width:100%;height:100%;display:block;border-radius:50%;transform:rotate(var(--deg,0deg));transition:transform .06s linear;pointer-events:none;-webkit-user-drag:none}
 .knob:focus-visible{outline:2px solid var(--warm);outline-offset:4px}
 /* tiny top chrome */
@@ -125,12 +127,9 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
         <div class="bar"><b id="bar"></b></div>
       </div>
 
-      <button class="play" id="play" type="button" aria-label="Play">
-        <svg class="ic-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>
-        <svg class="ic-pause" viewBox="0 0 24 24"><path d="M6 4h4.5v16H6zM13.5 4H18v16h-4.5z"/></svg>
-      </button>
+      <button class="play" id="play" type="button" aria-label="Play"><img src="../media/elevenradio-pause.png?v=2" alt="" width="208" height="208"></button>
 
-      <div class="knob" id="knob" role="slider" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0"><img src="../media/elevenradio-knob.png" alt="" width="228" height="228"></div>
+      <div class="knob" id="knob" role="slider" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0"><img src="../media/elevenradio-knob.png?v=2" alt="" width="238" height="238"></div>
       <div class="hint">Press play</div>
     </div>
 
@@ -261,10 +260,10 @@ poll();
 // title crawl: if it overflows, hold 3s, scroll to the end, hold, snap back
 let crawlTimer=null, crawlGen=0;
 function fitTitle(){ const w=el.tiWrap, t=el.ti; const gen=++crawlGen; clearTimeout(crawlTimer); t.style.transition='none'; t.style.transform='';
-  requestAnimationFrame(()=>{ const over=t.scrollWidth-w.clientWidth; if(over<=4) return;
+  requestAnimationFrame(()=>{ w.classList.add('crawl'); const over=t.scrollWidth-w.clientWidth; w.classList.remove('crawl'); if(over<=4) return;
     const dist=over+8, secs=dist/28;
-    const go=()=>{ if(gen!==crawlGen) return; t.style.transition=`transform ${secs}s linear`; t.style.transform=`translateX(${-dist}px)`;
-      crawlTimer=setTimeout(()=>{ if(gen!==crawlGen) return; t.style.transition='none'; t.style.transform=''; crawlTimer=setTimeout(go,3000); }, secs*1000+1500); };
+    const go=()=>{ if(gen!==crawlGen) return; w.classList.add('crawl'); requestAnimationFrame(()=>{ t.style.transition=`transform ${secs}s linear`; t.style.transform=`translateX(${-dist}px)`; });
+      crawlTimer=setTimeout(()=>{ if(gen!==crawlGen) return; t.style.transition='none'; t.style.transform=''; w.classList.remove('crawl'); crawlTimer=setTimeout(go,3000); }, secs*1000+1500); };
     crawlTimer=setTimeout(go,3000); }); }
 addEventListener('resize',fitTitle);
 // request line: placeholder until the Kip agent is wired in
