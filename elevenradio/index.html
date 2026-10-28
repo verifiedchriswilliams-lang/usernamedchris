@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<title>ElevenRadio</title>
+<meta name="description" content="ElevenRadio. Human curated, AI hosted, listener influenced. Tune in.">
+<meta property="og:title" content="ElevenRadio">
+<meta property="og:description" content="Human curated, AI hosted, listener influenced. Tune in.">
+<meta property="og:image" content="https://usernamedchris.com/media/elevenradio-radio.jpg">
+<meta property="og:url" content="https://usernamedchris.com/elevenradio/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="../media/photo.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;600&display=swap">
+<style>
+:root{--warm:#F3D9A6;--red:#FF4A3D;--blue:#3B5BFF;--font:Inter,system-ui,-apple-system,sans-serif;--mono:"Geist Mono",ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font);-webkit-font-smoothing:antialiased;overflow:hidden;touch-action:manipulation}
+.stage{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(120% 80% at 50% 110%,#1a1512 0,#000 60%)}
+/* the device: the rendered radio. On phones it fills the width; on larger screens it fills the height */
+.device{position:relative;width:min(100vw,calc(100vh * 1080 / 1918),560px);aspect-ratio:1080/1918;background:#000}
+@media (max-width:600px){.device{width:100vw}}
+.device>img.art{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;user-select:none;-webkit-user-drag:none}
+/* intro video sits on top of everything until it ends */
+.intro{position:absolute;inset:0;z-index:5;background:#000;transition:opacity .9s ease}
+.intro video{width:100%;height:100%;object-fit:cover;display:block}
+.intro.done{opacity:0;pointer-events:none}
+/* UI layer, hidden until the intro is over */
+.ui{position:absolute;inset:0;z-index:3;opacity:0;transition:opacity .8s ease .2s}
+.ui.on{opacity:1}
+/* glyph glow: pulses while playing, dims when stopped */
+.glow{position:absolute;left:22%;top:40%;width:52%;height:36%;pointer-events:none;border-radius:50%;
+  background:radial-gradient(40% 55% at 31% 50%,rgba(255,80,60,.6),transparent 70%),radial-gradient(40% 55% at 69% 50%,rgba(70,90,255,.6),transparent 70%);
+  filter:blur(26px);mix-blend-mode:screen;opacity:.0;transition:opacity 1.2s ease}
+.playing .glow{opacity:1;animation:breathe 2.8s ease-in-out infinite}
+.off{position:absolute;left:20%;top:39%;width:56%;height:38%;pointer-events:none;background:rgba(0,0,0,.0);transition:background 1.2s ease}
+.idle .off{background:rgba(0,0,0,.35)}
+@keyframes breathe{0%,100%{opacity:.55;transform:scale(.97)}50%{opacity:1;transform:scale(1.03)}}
+/* the tuning window becomes the now-playing pane */
+.pane{position:absolute;left:8%;top:14.2%;width:84%;height:14.3%;display:grid;grid-template-columns:auto 1fr auto;gap:4%;align-items:center;padding:0 3.5%;color:#F2EEE8;overflow:hidden;border-radius:6px;
+  background:radial-gradient(120% 140% at 50% 0%,#17171a 0,#09090a 60%,#050506 100%);box-shadow:inset 0 2px 10px rgba(0,0,0,.9),inset 0 0 0 1px rgba(255,255,255,.05)}
+.pane:before{content:"";position:absolute;left:50%;top:7%;width:3.2%;height:6%;margin-left:-1.6%;border-radius:2px;background:#ff2a1f;box-shadow:0 0 10px #ff3a2a,0 0 22px rgba(255,60,40,.6)}
+.pane:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.07),transparent 35%);pointer-events:none}
+.pane .cover{height:78%;aspect-ratio:1;border-radius:10%;background:#111 center/cover no-repeat;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 6px 18px rgba(0,0,0,.6);display:grid;place-items:center;overflow:hidden}
+.pane .cover.fallback:before{content:"";width:46%;height:60%;border-left:6px solid var(--red);border-right:6px solid var(--blue);box-sizing:border-box;filter:drop-shadow(0 0 8px rgba(255,120,100,.8))}
+.pane .txt{min-width:0;display:flex;flex-direction:column;gap:2%;line-height:1.15;padding-top:4%}
+.pane .st{font-family:var(--mono);font-size:clamp(9px,2.1vmin,12px);letter-spacing:.14em;text-transform:uppercase;color:var(--warm);opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pane .ti{font-weight:700;font-size:clamp(13px,3.2vmin,19px);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pane .ar{font-size:clamp(11px,2.6vmin,15px);color:rgba(242,238,232,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pane .state{font-family:var(--mono);font-size:clamp(9px,2vmin,12px);color:var(--warm);opacity:.85;letter-spacing:.1em}
+.pane .state i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#FF2F2F;box-shadow:0 0 8px #FF2F2F;margin-right:6px;vertical-align:middle;animation:blink 1.4s infinite}
+.idle .pane .state i{animation:none;opacity:.35;box-shadow:none}
+@keyframes blink{50%{opacity:.25}}
+/* progress hairline under the pane text */
+.bar{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.08)}
+.bar b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--blue));transition:width 1s linear}
+/* play button: sits exactly on the rendered button */
+.play{position:absolute;left:41.5%;top:83.7%;width:17%;aspect-ratio:1;border-radius:50%;border:0;padding:0;cursor:pointer;
+  background:radial-gradient(circle at 50% 40%,#2a2724,#0b0a09 70%);box-shadow:0 0 0 2px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 10px 24px rgba(0,0,0,.7);display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
+.play:active{transform:scale(.96)}
+.play svg{width:38%;height:38%;fill:var(--warm);filter:drop-shadow(0 0 6px rgba(243,217,166,.6))}
+.play .ic-pause{display:none}
+.playing .play .ic-play{display:none}.playing .play .ic-pause{display:block}
+/* volume knob: invisible hit area with a glowing indicator that rotates */
+.knob{position:absolute;left:71%;top:33.5%;width:22%;aspect-ratio:1;border-radius:50%;cursor:ns-resize;touch-action:none;-webkit-tap-highlight-color:transparent}
+.knob i{position:absolute;left:50%;top:9%;width:2.5%;height:12%;margin-left:-1.25%;background:var(--warm);border-radius:2px;box-shadow:0 0 6px rgba(243,217,166,.8);transform-origin:50% 341%;transform:rotate(var(--deg,0deg));transition:transform .08s}
+.knob.ios{display:none}
+/* tiny top chrome */
+.top{position:fixed;left:0;right:0;top:0;z-index:6;display:flex;justify-content:space-between;align-items:center;padding:max(14px,env(safe-area-inset-top)) 18px 0;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.top a{color:inherit;text-decoration:none}
+.top a:hover{color:#fff}
+.hint{position:absolute;left:0;right:0;bottom:3.2%;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);pointer-events:none;transition:opacity .6s}
+.playing .hint{opacity:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){.glow,.pane .state i{animation:none}}
+</style>
+</head>
+<body class="idle">
+<div class="top"><a href="/">← usernamedchris.com</a><span>ElevenRadio · Live</span></div>
+<div class="stage">
+  <div class="device" id="device">
+    <img class="art" src="../media/elevenradio-radio.jpg" alt="ElevenRadio transistor radio" width="1080" height="1918">
+    <div class="off"></div>
+    <div class="glow"></div>
+
+    <div class="ui" id="ui">
+      <div class="pane" id="pane" aria-live="polite">
+        <div class="cover fallback" id="cover"></div>
+        <div class="txt">
+          <div class="st" id="st">ElevenRadio</div>
+          <div class="ti" id="ti">Different Here</div>
+          <div class="ar" id="ar">Tap play to tune in</div>
+        </div>
+        <div class="state" id="state"><i></i>LIVE</div>
+        <div class="bar"><b id="bar"></b></div>
+      </div>
+
+      <button class="play" id="play" type="button" aria-label="Play">
+        <svg class="ic-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>
+        <svg class="ic-pause" viewBox="0 0 24 24"><path d="M6 4h4.5v16H6zM13.5 4H18v16h-4.5z"/></svg>
+      </button>
+
+      <div class="knob" id="knob" role="slider" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80" tabindex="0"><i></i></div>
+      <div class="hint">Press play</div>
+    </div>
+
+    <div class="intro" id="intro">
+      <video id="introVid" muted playsinline preload="auto" src="../media/elevenradio-intro.mp4"></video>
+    </div>
+  </div>
+</div>
+<audio id="audio" preload="none" playsinline></audio>
+<span class="sr" id="srNow"></span>
+
+<script>
+// ===== config =====
+const STREAM = 'https://shflab.superhifi.radio/halloween/playlist.m3u8'; // swap for the ElevenRadio master playlist when it arrives
+const STATION = 'ElevenRadio';
+const TAGLINE = 'Different Here';
+const INTRO_EVERY_VISIT = true;
+
+// ===== elements =====
+const body=document.body, audio=document.getElementById('audio'), ui=document.getElementById('ui'), intro=document.getElementById('intro'), vid=document.getElementById('introVid');
+const $=id=>document.getElementById(id);
+const el={cover:$('cover'),st:$('st'),ti:$('ti'),ar:$('ar'),bar:$('bar'),play:$('play'),knob:$('knob'),state:$('state')};
+
+// ===== intro =====
+function endIntro(){ intro.classList.add('done'); ui.classList.add('on'); }
+(function(){
+  const seen = sessionStorage.getItem('er-intro');
+  if(!INTRO_EVERY_VISIT && seen){ endIntro(); return; }
+  let started=false;
+  vid.addEventListener('ended',()=>{ sessionStorage.setItem('er-intro','1'); endIntro(); });
+  vid.addEventListener('error',endIntro);
+  vid.addEventListener('playing',()=>{started=true;});
+  vid.play().catch(endIntro);
+  setTimeout(()=>{ if(!started) endIntro(); },2500);     // no clip yet, or autoplay blocked: skip straight to the radio
+  setTimeout(()=>{ if(!intro.classList.contains('done')) endIntro(); },9000); // never trap anyone behind the intro
+})();
+
+// ===== playback: native HLS on Safari/iOS, hls.js elsewhere =====
+const isNative = audio.canPlayType('application/vnd.apple.mpegurl') !== '';
+let hls=null, hlsReady=false;
+function attach(){
+  if(isNative){ audio.src=STREAM; return Promise.resolve(); }
+  return new Promise((res,rej)=>{
+    const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.17/hls.min.js';
+    s.onload=()=>{ hls=new Hls({liveSyncDuration:12,enableWorker:true}); hls.loadSource(STREAM); hls.attachMedia(audio);
+      hls.on(Hls.Events.FRAG_CHANGED,(e,d)=>{ if(d.frag&&d.frag.title) applyMeta(parseMeta(d.frag.title)); });
+      hlsReady=true; res(); };
+    s.onerror=rej; document.head.appendChild(s);
+  });
+}
+let attached=false;
+async function play(){
+  if(!attached){ await attach(); attached=true; }
+  try{ await audio.play(); }catch(e){ console.warn(e); }
+}
+function pause(){ audio.pause(); }
+el.play.addEventListener('click',()=>{ audio.paused?play():pause(); });
+audio.addEventListener('playing',()=>{ body.classList.replace('idle','playing'); el.play.setAttribute('aria-label','Pause'); });
+audio.addEventListener('pause',()=>{ body.classList.replace('playing','idle'); el.play.setAttribute('aria-label','Play'); });
+audio.addEventListener('waiting',()=>{ el.state.innerHTML='<i></i>TUNING'; });
+audio.addEventListener('playing',()=>{ el.state.innerHTML='<i></i>LIVE'; });
+
+// ===== metadata: Super Hi-Fi writes a JSON blob on every #EXTINF line =====
+function parseMeta(title){ try{ return JSON.parse(title); }catch(e){ return null; } }
+let current=null;
+function applyMeta(m){
+  if(!m||!m.current) return;
+  const c=m.current;
+  if(current && current.id===c.id){ tick(c); return; }
+  current=c;
+  el.st.textContent=STATION; el.ti.textContent=c.title||TAGLINE; el.ar.textContent=c.artist||'';
+  if(c.image){ const im=new Image(); im.onload=()=>{ el.cover.style.backgroundImage=`url("${c.image}")`; el.cover.classList.remove('fallback'); }; im.onerror=()=>{ el.cover.style.backgroundImage=''; el.cover.classList.add('fallback'); }; im.src=c.image; }
+  else { el.cover.style.backgroundImage=''; el.cover.classList.add('fallback'); }
+  $('srNow').textContent=`Now playing ${c.title} by ${c.artist}`;
+  document.title=`${c.title} · ${c.artist} · ${STATION}`;
+  if('mediaSession' in navigator){
+    navigator.mediaSession.metadata=new MediaMetadata({title:c.title||STATION,artist:c.artist||'',album:STATION,artwork:c.image?[{src:c.image,sizes:'512x512',type:'image/jpeg'}]:[]});
+  }
+  tick(c);
+}
+function tick(c){
+  if(c.duration&&c.elapsed_ms!=null){ const p=Math.min(100,(c.elapsed_ms/1000/c.duration)*100); el.bar.style.width=p+'%'; }
+}
+// Safari path: poll the media playlist and pick the segment that matches what is actually playing (via PROGRAM-DATE-TIME)
+let variantUrl=null, pollTimer=null;
+async function resolveVariant(){
+  const t=await (await fetch(STREAM,{cache:'no-store'})).text();
+  const line=t.split('\n').map(l=>l.trim()).find(l=>l&&!l.startsWith('#'));
+  if(!line) return STREAM;
+  return new URL(line,STREAM).href;
+}
+function parsePlaylist(t){
+  const segs=[]; let pdt=null; let dur=0;
+  for(const raw of t.split('\n')){ const l=raw.trim();
+    if(l.startsWith('#EXT-X-PROGRAM-DATE-TIME:')) pdt=new Date(l.slice(25)).getTime();
+    else if(l.startsWith('#EXTINF:')){ const i=l.indexOf(','); dur=parseFloat(l.slice(8,i)); const title=l.slice(i+1); segs.push({pdt,dur,meta:parseMeta(title)}); if(pdt!=null) pdt+=dur*1000; }
+  }
+  return segs;
+}
+async function poll(){
+  try{
+    if(!variantUrl) variantUrl=await resolveVariant();
+    const segs=parsePlaylist(await (await fetch(variantUrl,{cache:'no-store'})).text());
+    if(!segs.length) return;
+    let pick=segs[segs.length-1];
+    // where is the listener, in wall-clock time?
+    let pos=null;
+    if(isNative && typeof audio.getStartDate==='function'){ const sd=audio.getStartDate(); if(sd && !isNaN(sd)) pos=sd.getTime()+audio.currentTime*1000; }
+    if(pos==null && hls && hls.playingDate) pos=hls.playingDate.getTime();
+    if(pos!=null){ for(const s of segs){ if(s.pdt!=null && s.pdt<=pos) pick=s; } }
+    if(pick.meta) applyMeta(pick.meta);
+  }catch(e){ console.warn('meta',e); }
+}
+function startPolling(){ if(pollTimer) return; poll(); pollTimer=setInterval(poll,5000); }
+audio.addEventListener('play',startPolling);
+// show what's on even before the first tap
+poll();
+
+// ===== media session controls (lock screen / Dynamic Island) =====
+if('mediaSession' in navigator){
+  navigator.mediaSession.setActionHandler('play',play);
+  navigator.mediaSession.setActionHandler('pause',pause);
+  navigator.mediaSession.metadata=new MediaMetadata({title:TAGLINE,artist:STATION,album:STATION,artwork:[{src:location.origin+'/media/elevenradio-radio.jpg',sizes:'1080x1918',type:'image/jpeg'}]});
+}
+
+// ===== volume knob (iOS ignores software volume, so it hides there) =====
+const iOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+if(iOS) el.knob.classList.add('ios');
+let vol=0.8; const setVol=v=>{ vol=Math.max(0,Math.min(1,v)); audio.volume=vol; el.knob.style.setProperty('--deg',(-135+vol*270)+'deg'); el.knob.setAttribute('aria-valuenow',Math.round(vol*100)); };
+setVol(vol);
+let drag=null;
+el.knob.addEventListener('pointerdown',e=>{ drag={y:e.clientY,v:vol}; el.knob.setPointerCapture(e.pointerId); });
+el.knob.addEventListener('pointermove',e=>{ if(!drag) return; setVol(drag.v+(drag.y-e.clientY)/160); });
+el.knob.addEventListener('pointerup',()=>drag=null); el.knob.addEventListener('pointercancel',()=>drag=null);
+el.knob.addEventListener('wheel',e=>{ e.preventDefault(); setVol(vol-Math.sign(e.deltaY)*0.05); },{passive:false});
+el.knob.addEventListener('keydown',e=>{ if(e.key==='ArrowUp'||e.key==='ArrowRight'){setVol(vol+0.05);e.preventDefault();} if(e.key==='ArrowDown'||e.key==='ArrowLeft'){setVol(vol-0.05);e.preventDefault();} });
+// space bar toggles
+addEventListener('keydown',e=>{ if(e.code==='Space'&&document.activeElement.tagName!=='BUTTON'){ e.preventDefault(); audio.paused?play():pause(); } });
+</script>
+</body>
+</html>

@@ -156,15 +156,22 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 }
 
 /* ===== the station band ===== */
-.station{position:relative;overflow:hidden;border-radius:24px;background:var(--dark);color:var(--ink-on-dark);padding:28px 28px 26px;display:grid;grid-template-columns:1fr auto;gap:20px 32px;align-items:end;box-shadow:var(--card-shadow)}
-@media (max-width:760px){.station{grid-template-columns:1fr}}
-.station .freq{font-family:var(--mono);font-size:clamp(44px,8vw,96px);font-weight:600;letter-spacing:-.04em;line-height:1;color:#fff}
-.station .freq small{font-size:.32em;letter-spacing:.1em;margin-left:12px;color:var(--accent)}
-.station .what{margin:10px 0 0;font-size:15px;line-height:1.5;color:rgba(242,238,232,.75);max-width:56ch}
-.station .dial{position:relative;height:54px;grid-column:1/-1;overflow:hidden;border-top:1px solid rgba(255,255,255,.12);margin-top:6px}
-.station .ticks{position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.35) 0 1px,transparent 1px 12px),repeating-linear-gradient(90deg,rgba(255,255,255,.7) 0 1px,transparent 1px 60px);background-size:100% 14px,100% 24px;background-repeat:repeat-x;background-position:0 100%,0 100%;animation:dial 30s linear infinite}
-@keyframes dial{to{background-position:-600px 100%,-600px 100%}}
-.station .needle{position:absolute;left:38%;top:0;bottom:0;width:2px;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.station{position:relative;overflow:hidden;border-radius:24px;background:var(--dark);color:var(--ink-on-dark);padding:28px 28px 26px;display:grid;grid-template-columns:1.05fr .95fr;grid-template-rows:auto auto;gap:18px 36px;align-items:center;box-shadow:var(--card-shadow)}
+.station .st-copy{grid-column:1;grid-row:1}
+.station .now{grid-column:1;grid-row:2;align-self:end}
+.station .st-copy .k{margin:0 0 8px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,238,232,.6)}
+.station .st-name{margin:0;font-size:clamp(34px,5vw,56px);font-weight:900;letter-spacing:-.035em;line-height:1;color:#fff}
+.station .what{margin:12px 0 0;font-size:15px;line-height:1.5;color:rgba(242,238,232,.78);max-width:56ch}
+/* teaser: the tuning window from the ElevenRadio device, with a breathing glow on the 11 glyph and light moving across the chrome */
+.station .teaser{position:relative;display:block;grid-column:2;grid-row:1/3;align-self:center;border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.6);isolation:isolate}
+.station .teaser img{display:block;width:100%;height:auto}
+.station .t-glow{position:absolute;left:38%;top:20%;width:24%;height:70%;pointer-events:none;mix-blend-mode:screen;filter:blur(18px);border-radius:50%;
+  background:radial-gradient(50% 60% at 50% 45%,rgba(255,215,160,.9),rgba(255,120,80,.35) 55%,transparent 75%);animation:glyph 2.6s ease-in-out infinite}
+.station .t-sheen{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.28) 48%,rgba(255,200,150,.18) 52%,transparent 68%);background-size:220% 100%;animation:chrome 7s ease-in-out infinite;opacity:.9}
+@keyframes glyph{0%,100%{opacity:.35;transform:scale(.96)}50%{opacity:.95;transform:scale(1.06)}}
+@keyframes chrome{0%{background-position:180% 0}60%,100%{background-position:-120% 0}}
+@media (prefers-reduced-motion:reduce){.station .t-glow,.station .t-sheen{animation:none}}
+@media (max-width:760px){.station{grid-template-columns:1fr;grid-template-rows:auto}.station .st-copy,.station .now,.station .teaser{grid-column:1;grid-row:auto}.station .teaser{margin-top:4px}}
 .station .now{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(242,238,232,.7);white-space:nowrap;display:flex;gap:10px;align-items:center}
 .station .now b{color:var(--accent);font-weight:600}
 .station .now i{width:8px;height:8px;border-radius:50%;background:#F0476A;box-shadow:0 0 10px #F0476A;font-style:normal;animation:blink 1.4s infinite}
@@ -441,14 +448,18 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 
 <!-- THE STATION -->
 <div class="label"><h2>On air</h2><span>In progress</span></div>
-<section class="station" id="station" aria-label="The Station">
-  <div>
-    <div class="freq">101.5<small>FM · UNC</small></div>
-    <p class="what">The Station is an AI radio station built from the ground up: AI hosts, a crowd-steered playlist, and a signal that never goes off air. Still under construction. Listen in while it's being built.</p>
-    <a class="cta" href="#station">Tune in →</a>
+<section class="station" id="station" aria-label="ElevenRadio">
+  <div class="st-copy">
+    <p class="k">Coming this week</p>
+    <h3 class="st-name">ElevenRadio</h3>
+    <p class="what">Human curated. AI hosted. Listener influenced. Live DJ interaction, as we experiment with the shape of what radio can become. Listen, and talk back.</p>
+    <a class="cta" href="/elevenradio/">Tune in →</a>
   </div>
   <div class="now"><i></i><span>Now playing</span><b>Test signal</b></div>
-  <div class="dial"><div class="ticks"></div><div class="needle"></div></div>
+  <a class="teaser" href="/elevenradio/" aria-label="Open ElevenRadio">
+    <img src="media/elevenradio-pane.jpg" alt="ElevenRadio tuning window locked on the 11 glyph" width="972" height="340">
+    <span class="t-glow"></span><span class="t-sheen"></span>
+  </a>
 </section>
 
 <!-- LINKS -->
