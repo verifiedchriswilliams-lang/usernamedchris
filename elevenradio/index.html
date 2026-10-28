@@ -195,7 +195,6 @@ const STATION = 'ElevenRadio';
 const TAGLINE = 'Different Here';
 const INTRO_EVERY_VISIT = true;
 const KIP_AGENT_ID = 'agent_4201m4511hnzebhrexm3pjhq48fc'; // Kip: Keep It Playing
-const DUCK_LEVEL = 0.3; // station level during a call, everywhere (iPhone included, via Web Audio)
 
 // ===== elements =====
 const body=document.body, audio=document.getElementById('audio'), ui=document.getElementById('ui'), intro=document.getElementById('intro'), vid=document.getElementById('introVid');
@@ -349,19 +348,37 @@ addEventListener('resize',fitTitle);
 let convo=null, callActive=false, wasPlaying=false, lvlTimer=null;
 const how=$('how'), orb=$('orb'), lvl=$('lvl');
 function loadSdk(){ return window.ElevenLabsClient?Promise.resolve():new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src='https://cdn.jsdelivr.net/npm/@elevenlabs/client@1.32.0/dist/lib.iife.js'; sc.onload=res; sc.onerror=rej; document.head.appendChild(sc); }); }
+// The handoff is staged like a real phone call interrupting the radio. On phones the OS re-routes audio the
+// moment the mic opens, so the station must be silent and stopped BEFORE that happens, and restarted only after
+// the mic is released. Desktop keeps a quiet bed under the call since it has no audio-session switch.
+const mobile=/Android|iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const CALL_BED = mobile ? 0 : 0.18;
 let wasPlayingForCall=false;
-function duck(on){ ensureGraph(); resumeGraph();
-  if(!graphLive && isNative){ if(on){ wasPlayingForCall=!audio.paused; if(wasPlayingForCall) audio.pause(); } else if(wasPlayingForCall) play(); return; }
-  setLevel(on?Math.min(vol,DUCK_LEVEL):vol, .5); }
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function fadeTo(level,secs){ ensureGraph(); resumeGraph(); setLevel(level,secs); await wait(secs*1000+40); }
+async function stationOut(){
+  wasPlayingForCall=!audio.paused;
+  if(!wasPlayingForCall) return;
+  if(graphLive||!isNative) await fadeTo(CALL_BED,.6);
+  if(CALL_BED===0 || (!graphLive&&isNative)){ audio.pause(); if(hls) hls.stopLoad(); }
+}
+async function stationBack(){
+  if(!wasPlayingForCall) return;
+  if(audio.paused){ setLevel(0,0); if(hls) hls.startLoad(-1); await play(); await wait(250); }
+  await fadeTo(vol,1.2);
+}
 function setHow(t,cls){ how.textContent=t; orb.className='orb'+(cls?' '+cls:''); }
 async function startCall(){
   if(callActive) return; callActive=true; body.classList.add('oncall'); setHow('Connecting');
-  // keep the stream's media element alive on iOS before we take the mic
-  duck(true);
   try{
-    await loadSdk();
-    await navigator.mediaDevices.getUserMedia({audio:true});
-    convo=await ElevenLabsClient.Conversation.startSession({
+    const sdk=loadSdk();
+    await stationOut();           // 1. radio down and stopped, in silence
+    await wait(120);              // 2. let the output route settle
+    await sdk;
+    const mic=await navigator.mediaDevices.getUserMedia({audio:true});   // 3. now take the mic
+    mic.getTracks().forEach(t=>t.stop());                                // the SDK opens its own; this was just the permission
+    if(!callActive) return;
+    convo=await ElevenLabsClient.Conversation.startSession({             // 4. connect
       agentId:KIP_AGENT_ID, connectionType:'websocket',
       onConnect:()=>{ setHow('On the line','listening'); lvlTimer=setInterval(()=>{ try{ const v=convo.getOutputVolume?convo.getOutputVolume():0; const u=convo.getInputVolume?convo.getInputVolume():0; lvl.style.width=Math.round(Math.max(v,u)*100)+'%'; }catch(e){} },100); },
       onModeChange:m=>{ setHow(m.mode==='speaking'?'Kip is talking':'Listening', m.mode==='speaking'?'speaking':'listening'); },
@@ -371,11 +388,16 @@ async function startCall(){
     if('mediaSession' in navigator) navigator.mediaSession.metadata=new MediaMetadata({title:'On the line with Kip',artist:STATION,album:STATION});
   }catch(e){ console.warn('call failed',e); setHow(/NotAllowed|Permission/i.test(String(e))?'Mic blocked':'Could not connect'); setTimeout(()=>endCall(true),1600); }
 }
+let ending=false;
 async function endCall(fromRemote){
-  if(!callActive) return; callActive=false; clearInterval(lvlTimer); lvl.style.width='0';
-  try{ if(convo && !fromRemote) await convo.endSession(); }catch(e){} convo=null;
-  body.classList.remove('oncall'); duck(false);
+  if(!callActive||ending) return; ending=true; callActive=false; clearInterval(lvlTimer); lvl.style.width='0';
+  setHow('Hanging up');
+  try{ if(convo && !fromRemote) await convo.endSession(); }catch(e){} convo=null;   // 1. drop the line, release the mic
+  await wait(mobile?450:150);                                                        // 2. let the route switch back
+  body.classList.remove('oncall');
   if(current) applyMeta({current}); else if('mediaSession' in navigator) navigator.mediaSession.metadata=new MediaMetadata({title:TAGLINE,artist:STATION,album:STATION});
+  await stationBack();                                                               // 3. radio back, fading up
+  ending=false;
 }
 el.req.addEventListener('click',startCall);
 $('endCall').addEventListener('click',()=>endCall(false));
