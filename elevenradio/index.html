@@ -246,7 +246,7 @@ function ensureGraph(){ if(gain) return; try{ actx=new (window.AudioContext||win
 const glowEl=document.getElementById('glow'), coreEl=document.getElementById('core'), tintEl=document.getElementById('tint');
 let vizOn=false, beat=0, floor=0.15, heard=0, silentFrames=0;
 function startViz(){ if(vizOn) return; vizOn=true; let last=performance.now();
-  (function frame(now){ if(!vizOn) return; requestAnimationFrame(frame); const dt=Math.min(.05,(now-last)/1000); last=now;
+  (function frame(now){ if(!vizOn) return; requestAnimationFrame(frame); try{ const dt=Math.min(.05,(now-last)/1000); last=now;
     // low end: bins ~1..8 cover roughly 40 to 350 Hz at 44.1k/512
     let target=0;
     if(analyser && !audio.paused && !document.hidden){ analyser.getByteFrequencyData(fft); let sum=0; for(let i=1;i<9;i++) sum+=fft[i]; const bass=sum/8/255; if(sum>0){ heard++; graphLive=true; silentFrames=0; } else if(audio.currentTime>3) silentFrames++;
@@ -255,9 +255,10 @@ function startViz(){ if(vizOn) return; vizOn=true; let last=performance.now();
     if(!graphLive && !audio.paused) target=.18+.14*Math.sin(now/1000*2.1);   // no signal reaching us: slow breath instead of a dead light
     beat += (target-beat)*(target>beat? .55 : dt*6);   // fast attack, slow release
     // slow hue drift: warm pool wanders red to orange to pink, cool pool blue to violet to teal, each on its own clock
-    const t=now/1000; const rot=-12+Math.sin(t/19)*42+Math.sin(t/6.7)*8;   // roughly -62 to +38: pink/red/orange on the warm side, cyan/blue/violet on the cool side const h1=4+rot; const h2=232+rot;
+    const t=now/1000; const rot=-12+Math.sin(t/19)*42+Math.sin(t/6.7)*8; /* roughly -62 to +38: pink/red/orange warm, cyan/blue/violet cool */ const h1=4+rot; const h2=232+rot;
     tintEl.style.setProperty('--rot',rot.toFixed(1)+'deg'); tintEl.style.setProperty('--beat',beat.toFixed(3));
     for(const el of [glowEl,coreEl]){ el.style.setProperty('--beat',beat.toFixed(3)); el.style.setProperty('--h1',h1.toFixed(1)); el.style.setProperty('--h2',h2.toFixed(1)); }
+    }catch(e){ console.warn('viz',e); }
   })(last); }
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden) resumeGraph(); });
 function resumeGraph(){ if(actx&&actx.state!=='running') actx.resume().catch(()=>{}); }
