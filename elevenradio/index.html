@@ -62,11 +62,14 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 .pane .st{font-family:var(--mono);font-size:clamp(8px,calc(var(--ph,100px)*.1),12px);letter-spacing:.14em;text-transform:uppercase;color:var(--warm);opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pane .ti{font-weight:700;text-overflow:ellipsis;font-size:clamp(12px,calc(var(--ph,100px)*.17),20px);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pane .ar{font-size:clamp(10px,calc(var(--ph,100px)*.13),15px);color:rgba(242,238,232,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* request line: mic glyph with a two-line mono label, sits where LIVE used to */
-.req{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:calc(var(--ph,100px)*.04);padding:calc(var(--ph,100px)*.07) calc(var(--ph,100px)*.09);border-radius:calc(var(--ph,100px)*.1);border:1px solid rgba(243,217,166,.28);background:rgba(255,255,255,.03);color:var(--warm);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .2s,border-color .2s}
-.req:hover,.req:focus-visible{background:rgba(243,217,166,.1);border-color:rgba(243,217,166,.6);outline:none}
-.req svg{width:calc(var(--ph,100px)*.2);height:calc(var(--ph,100px)*.2);fill:none;stroke:var(--warm);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px rgba(243,217,166,.5))}
-.req span{font-family:var(--mono);font-size:clamp(6px,calc(var(--ph,100px)*.075),9px);letter-spacing:.14em;text-transform:uppercase;line-height:1.15;text-align:center;opacity:.9}
+/* request line: ringing handset in a thin ring, label stacked beneath, no box */
+.req{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:calc(var(--ph,100px)*.05);padding:0 0 0 calc(var(--ph,100px)*.04);border:0;background:none;color:var(--warm);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.req .c{position:relative;width:calc(var(--ph,100px)*.38);height:calc(var(--ph,100px)*.38);border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#2a2724,#0b0a09 70%);box-shadow:0 0 0 1px rgba(243,217,166,.5),inset 0 1px 0 rgba(255,255,255,.12);transition:box-shadow .2s,transform .12s}
+.req:hover .c,.req:focus-visible .c{box-shadow:0 0 0 1px rgba(243,217,166,.9),0 0 14px rgba(243,217,166,.35),inset 0 1px 0 rgba(255,255,255,.12)}
+.req:active .c{transform:scale(.95)}
+.req:focus-visible{outline:none}
+.req svg{width:52%;height:52%;fill:none;stroke:var(--warm);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px rgba(243,217,166,.5))}
+.req span{font-family:var(--mono);font-size:clamp(6px,calc(var(--ph,100px)*.075),9px);letter-spacing:.14em;text-transform:uppercase;line-height:1.2;text-align:center;opacity:.85}
 /* the 11 glyph beside the station name */
 .pane .st{display:flex;align-items:center;gap:.45em}
 .pane .st i{display:inline-block;width:.55em;height:.85em;border-left:.22em solid var(--warm);border-right:.22em solid var(--warm);box-sizing:border-box;filter:drop-shadow(0 0 3px rgba(243,217,166,.7))}
@@ -120,7 +123,7 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
           <div class="ti" id="tiWrap"><span id="ti">Different Here</span></div>
           <div class="ar" id="ar">Tap play to tune in</div>
         </div>
-        <button class="req" id="req" type="button" aria-label="Request line: talk to Kip"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg><span>Request<br>line</span></button>
+        <button class="req" id="req" type="button" aria-label="Request line: call Kip"><span class="c"><svg viewBox="0 0 24 24"><path d="M5.5 3h3l1.6 4-2 1.3a11 11 0 0 0 6.6 6.6l1.3-2 4 1.6v3a2 2 0 0 1-2 2A15.5 15.5 0 0 1 3.5 5a2 2 0 0 1 2-2z"/><path d="M15 3.5a6 6 0 0 1 5.5 5.5M15 7a2.5 2.5 0 0 1 2 2"/></svg></span><span>Request<br>line</span></button>
         <div class="bar"><b id="bar"></b></div>
       </div>
 
