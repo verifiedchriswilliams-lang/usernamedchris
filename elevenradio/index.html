@@ -237,6 +237,7 @@ let attached=false;
     vid.muted=false; vid.volume=1; vid.play().catch(()=>{ endIntro(); play(); });
     ensureGraph(); resumeGraph();
     // use this same tap to unlock the stream element so the station can start by itself after the intro
+    ensureGraph(); resumeGraph();
     attach().then(()=>{ attached=true; const p=audio.play(); if(p&&p.then) p.then(()=>audio.pause()).catch(()=>{}); }).catch(()=>{});
   });
 })();
@@ -248,7 +249,7 @@ let isNative = false; let graphLive=false;
 // iOS ignores audio.volume, so on iOS the stream runs through a Web Audio gain node, which it does honor
 const iOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 let actx=null, gain=null, analyser=null, fft=null;
-function ensureGraph(){ if(gain) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); const src=actx.createMediaElementSource(audio); gain=actx.createGain(); gain.gain.value=1; analyser=actx.createAnalyser(); analyser.fftSize=512; analyser.smoothingTimeConstant=.82; fft=new Uint8Array(analyser.frequencyBinCount); src.connect(gain); gain.connect(analyser); analyser.connect(actx.destination); startViz(); }catch(e){ console.warn('web audio',e); } }
+function ensureGraph(){ if(gain) return; window._graphFirst=!attached&&!audio.src; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); const src=actx.createMediaElementSource(audio); gain=actx.createGain(); gain.gain.value=1; analyser=actx.createAnalyser(); analyser.fftSize=512; analyser.smoothingTimeConstant=.82; fft=new Uint8Array(analyser.frequencyBinCount); src.connect(gain); gain.connect(analyser); analyser.connect(actx.destination); startViz(); }catch(e){ console.warn('web audio',e); } }
 // ===== the glyph reacts to the music =====
 const glowEl=document.getElementById('glow'), coreEl=document.getElementById('core'), tintEl=document.getElementById('tint');
 let vizOn=false, beat=0, floor=0.15, heard=0, silentFrames=0;
@@ -288,8 +289,8 @@ function attach(){
   });
 }
 async function play(){
+  ensureGraph(); resumeGraph();            // the source node must exist BEFORE the stream is attached, or iOS routes around it
   if(!attached){ await attach(); attached=true; }
-  ensureGraph(); resumeGraph();
   try{ await audio.play(); }catch(e){ console.warn(e); }
 }
 function pause(){ audio.pause(); }
@@ -424,7 +425,7 @@ addEventListener('pagehide',()=>{ if(convo) convo.endSession().catch(()=>{}); })
 // ===== diagnostics: add ?debug=1 to the URL =====
 if(/[?&]debug=1/.test(location.search)){ const d=document.createElement('pre'); d.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99;margin:0;padding:8px 10px;background:rgba(0,0,0,.75);color:#9f9;font:11px/1.4 monospace;border-radius:8px;pointer-events:none;white-space:pre-wrap;max-width:60vw'; document.body.appendChild(d);
   setInterval(()=>{ let sum=0; if(analyser){ analyser.getByteFrequencyData(fft); for(let i=0;i<fft.length;i++) sum+=fft[i]; }
-    d.textContent=`path: ${hls?'hls.js':(isNative?'native HLS':'none')}\nMMS: ${'ManagedMediaSource' in window} MSE: ${'MediaSource' in window}\nhls.isSupported: ${window.Hls?Hls.isSupported():'(not loaded)'}\nctx: ${actx?actx.state:'none'} gain: ${gain?gain.gain.value.toFixed(2):'none'}\nanalyser energy: ${sum}\nplaying: ${!audio.paused} t=${audio.currentTime.toFixed(1)} vol=${vol.toFixed(2)}\nerr: ${window._lastErr||''}`; },500);
+    d.textContent=`path: ${hls?'hls.js':(isNative?'native HLS':'none')} graphFirst: ${window._graphFirst}\nMMS: ${'ManagedMediaSource' in window} MSE: ${'MediaSource' in window}\nhls.isSupported: ${window.Hls?Hls.isSupported():'(not loaded)'}\nctx: ${actx?actx.state:'none'} gain: ${gain?gain.gain.value.toFixed(2):'none'}\nanalyser energy: ${sum}\nplaying: ${!audio.paused} t=${audio.currentTime.toFixed(1)} vol=${vol.toFixed(2)}\nerr: ${window._lastErr||''}`; },500);
   addEventListener('error',e=>{ window._lastErr=e.message; }); const w=console.warn; console.warn=(...a)=>{ window._lastErr=a.map(String).join(' ').slice(0,120); w(...a); }; }
 // ===== media session controls (lock screen / Dynamic Island) =====
 if('mediaSession' in navigator){
