@@ -179,6 +179,9 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 @media (max-width:760px){.station{grid-template-columns:1fr;grid-template-rows:auto}.station .st-copy,.station .now,.station .teaser{grid-column:1;grid-row:auto}.station .teaser{margin-top:4px}}
 .station .now{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(242,238,232,.7);white-space:nowrap;display:flex;gap:10px;align-items:center}
 .station .now b{color:var(--accent);font-weight:600}
+.station .now em{font-style:normal;color:rgba(242,238,232,.85)}
+.station .now{white-space:normal;flex-wrap:wrap}
+.station .st-name .g11{display:inline-block;width:.52em;height:.78em;border-left:.19em solid #fff;border-right:.19em solid #fff;box-sizing:border-box;vertical-align:-.04em;margin-right:.22em;filter:drop-shadow(0 0 6px rgba(255,255,255,.5))}
 .station .now i{width:8px;height:8px;border-radius:50%;background:#F0476A;box-shadow:0 0 10px #F0476A;font-style:normal;animation:blink 1.4s infinite}
 @keyframes blink{50%{opacity:.25}}
 .station .cta{display:inline-block;margin-top:14px;font-size:13px;font-weight:500;color:#fff;border-bottom:1px solid rgba(255,255,255,.35);padding-bottom:2px}
@@ -452,15 +455,15 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 </section>
 
 <!-- THE STATION -->
-<div class="label"><h2>On air</h2><span>In progress</span></div>
+<div class="label"><h2>On air</h2></div>
 <section class="station" id="station" aria-label="ElevenRadio">
   <div class="st-copy">
-    <p class="k">Coming this week</p>
-    <h3 class="st-name">ElevenRadio</h3>
+    <p class="k">Live now</p>
+    <h3 class="st-name"><i class="g11" aria-hidden="true"></i>ElevenRadio</h3>
     <p class="what">Human curated. AI hosted. Listener influenced. Live DJ interaction, as we experiment with the shape of what radio can become. Radio talks back.</p>
     <a class="cta" href="/elevenradio/">Tune in →</a>
   </div>
-  <div class="now"><i></i><span>Now playing</span><b>Test signal</b></div>
+  <div class="now"><i></i><span>Now playing</span><b id="npTitle">Tuning in</b><em id="npArtist"></em></div>
   <a class="teaser" href="/elevenradio/" aria-label="Open ElevenRadio">
     <img src="media/elevenradio-pane.jpg" alt="ElevenRadio tuning window locked on the 11 glyph" width="972" height="340">
     <span class="t-glow"></span><span class="t-sheen"></span>
@@ -507,6 +510,17 @@ document.querySelectorAll('.avatar').forEach(el=>el.addEventListener('keydown',e
   if(location.hash==='#resume') set(true);
   document.querySelectorAll('.go-resume').forEach(a=>a.addEventListener('click',()=>set(true)));
 })();
+// On Air band: live now-playing from the ElevenRadio stream
+(function(){ const t=document.getElementById('npTitle'), a=document.getElementById('npArtist'); if(!t) return;
+  const M='https://kphld.superhifi.radio/cw/playlist.m3u8'; let v=null;
+  async function tick(){ try{
+    if(!v){ const m=await (await fetch(M,{cache:'no-store'})).text(); const line=m.split('\n').map(x=>x.trim()).find(x=>x&&!x.startsWith('#')); v=new URL(line,M).href; }
+    const txt=await (await fetch(v,{cache:'no-store'})).text(); const lines=txt.split('\n').filter(l=>l.startsWith('#EXTINF:'));
+    // the listener on the player sits ~72s behind the live edge, so show the segment from about that far back
+    const pick=lines[Math.max(0,lines.length-13)]||lines[lines.length-1]; const j=JSON.parse(pick.slice(pick.indexOf(',')+1));
+    if(j&&j.current){ t.textContent=j.current.title||'ElevenRadio'; a.textContent=j.current.artist?(' · '+j.current.artist):''; }
+  }catch(e){} }
+  tick(); setInterval(tick,15000); })();
 // card glare + play only on screen
 document.querySelectorAll('.card').forEach(c=>c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect();const g=c.querySelector('.glare');g.style.left=(e.clientX-r.left)+'px';g.style.top=(e.clientY-r.top)+'px'}));
 if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(x=>{const v=x.target;x.isIntersecting?v.play().catch(()=>{}):v.pause()}),{threshold:.15});document.querySelectorAll('video').forEach(v=>io.observe(v));}
