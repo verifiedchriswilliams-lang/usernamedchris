@@ -151,6 +151,8 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 @media (max-width:600px){.top{display:none}}
 .hint{position:absolute;left:0;right:0;bottom:3.2%;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);pointer-events:none;transition:opacity .6s}
 .playing .hint{opacity:0}
+.hint.knobhint{bottom:auto;top:29%;left:0;right:0;opacity:0;transition:opacity .4s;color:var(--warm)}
+.playing .hint.knobhint.on{opacity:.9}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (prefers-reduced-motion:reduce){.glow,.pane:before,.ledwash,.pane .ti.crawl span{animation:none}.glow,.core{transform:none!important}}
 </style>
@@ -189,6 +191,7 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 
       <div class="knob" id="knob" role="slider" aria-label="Volume" aria-valuemin="0" aria-valuemax="11" aria-valuenow="6" tabindex="0"><img src="../media/elevenradio-knob.png?v=2" alt="" width="238" height="238"></div>
       <div class="hint">Press play</div>
+      <div class="hint knobhint" id="knobHint">Volume: use the side buttons on iPhone</div>
     </div>
 
     <div class="intro" id="intro">
@@ -250,6 +253,26 @@ let isNative = false; let graphLive=false;
 const iOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 let actx=null, gain=null, analyser=null, fft=null;
 function ensureGraph(){ if(gain) return; window._graphFirst=!attached&&!audio.src; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); const src=actx.createMediaElementSource(audio); gain=actx.createGain(); gain.gain.value=1; analyser=actx.createAnalyser(); analyser.fftSize=512; analyser.smoothingTimeConstant=.82; fft=new Uint8Array(analyser.frequencyBinCount); src.connect(gain); gain.connect(analyser); analyser.connect(actx.destination); startViz(); }catch(e){ console.warn('web audio',e); } }
+// ===== iPhone: WebKit won't route Media Source audio into Web Audio, so the glyph gets its pulse from a
+// parallel decode of the same segments (analysis only; the speaker keeps playing from the media element).
+let decodeViz=null;
+function startDecodeViz(){ if(decodeViz) return; const dctx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  const env=new Map(); const seen=new Set(); let busy=false; const HOP=0.05;
+  async function analyse(seg){ if(busy||!seg.uri||seen.has(seg.uri)) return; busy=true; seen.add(seg.uri);
+    try{ const ab=await (await fetch(seg.uri)).arrayBuffer(); const buf=await new Promise((res,rej)=>{ const r=dctx.decodeAudioData(ab,res,rej); if(r&&r.then) r.then(res,rej); });
+      const ch=buf.getChannelData(0), sr=buf.sampleRate, hop=Math.floor(sr*HOP); const out=[]; let lp=0; const k=1-Math.exp(-2*Math.PI*180/sr);  // one-pole low-pass at ~180 Hz: kick and bass
+      for(let i=0;i<ch.length;i+=hop){ let acc=0; const end=Math.min(ch.length,i+hop); for(let j=i;j<end;j++){ lp+=k*(ch[j]-lp); acc+=lp*lp; } out.push(Math.sqrt(acc/(end-i))); }
+      env.set(seg.uri,{pdt:seg.pdt,dur:seg.dur,e:out});
+      for(const [u,v] of env){ if(env.size>8) env.delete(u); else break; }
+    }catch(e){ console.warn('decodeViz',e); } busy=false; }
+  let pos=null, floorE=0.02;
+  decodeViz={
+    feed(segs,p){ if(p!=null) pos=p; const now=pos||Date.now(); const want=segs.filter(s=>s.pdt!=null && s.pdt+s.dur*1000>now-2000 && s.pdt<now+20000).slice(0,3); (async()=>{ for(const s of want) await analyse(s); })(); },
+    energyNow(){ if(pos==null) return null; const t=hls&&hls.playingDate?hls.playingDate.getTime():null; if(t!=null) pos=t; const at=pos;
+      for(const v of env.values()){ if(v.pdt<=at && at<v.pdt+v.dur*1000){ const i=Math.floor((at-v.pdt)/1000/HOP); const e=v.e[Math.min(v.e.length-1,i)]||0; floorE+=(e-floorE)*.01; return Math.max(0,Math.min(1,(e-floorE*.7)*9)); } }
+      return null; }
+  };
+}
 // ===== the glyph reacts to the music =====
 const glowEl=document.getElementById('glow'), coreEl=document.getElementById('core'), tintEl=document.getElementById('tint');
 let vizOn=false, beat=0, floor=0.15, heard=0, silentFrames=0;
@@ -257,10 +280,10 @@ function startViz(){ if(vizOn) return; vizOn=true; let last=performance.now();
   (function frame(now){ if(!vizOn) return; requestAnimationFrame(frame); try{ const dt=Math.min(.05,(now-last)/1000); last=now;
     // low end: bins ~1..8 cover roughly 40 to 350 Hz at 44.1k/512
     let target=0;
-    if(analyser && !audio.paused && !document.hidden){ analyser.getByteFrequencyData(fft); let sum=0; for(let i=1;i<9;i++) sum+=fft[i]; const bass=sum/8/255; if(sum>0){ heard++; graphLive=true; silentFrames=0; } else if(audio.currentTime>3) silentFrames++;
+    if(analyser && !audio.paused && !document.hidden){ analyser.getByteFrequencyData(fft); let sum=0; for(let i=1;i<9;i++) sum+=fft[i]; const bass=sum/8/255; if(sum>0){ heard++; graphLive=true; silentFrames=0; } else if(audio.currentTime>3){ silentFrames++; if(iOS && silentFrames>120 && !decodeViz){ startDecodeViz(); poll(); } }
       // adaptive floor so quiet songs still breathe and loud songs don't peg
       floor+= (bass-floor)*dt*.4; target=Math.max(0,Math.min(1,(bass-floor)*3.2)); }
-    if(!graphLive && !audio.paused) target=.18+.14*Math.sin(now/1000*2.1);   // no signal reaching us: slow breath instead of a dead light
+    if(!graphLive && !audio.paused){ const e=decodeViz?decodeViz.energyNow():null; target = e!=null ? e : .18+.14*Math.sin(now/1000*2.1); }   // graph dead (iOS): use the parallel decode, else a slow breath
     beat += (target-beat)*(target>beat? .55 : dt*6);   // fast attack, slow release
     // slow hue drift: warm pool wanders red to orange to pink, cool pool blue to violet to teal, each on its own clock
     const t=now/1000; const rot=-12+Math.sin(t/19)*42+Math.sin(t/6.7)*8; /* roughly -62 to +38: pink/red/orange warm, cyan/blue/violet cool */ const h1=4+rot; const h2=232+rot;
@@ -331,7 +354,8 @@ function parsePlaylist(t){
   const segs=[]; let pdt=null; let dur=0;
   for(const raw of t.split('\n')){ const l=raw.trim();
     if(l.startsWith('#EXT-X-PROGRAM-DATE-TIME:')) pdt=new Date(l.slice(25)).getTime();
-    else if(l.startsWith('#EXTINF:')){ const i=l.indexOf(','); dur=parseFloat(l.slice(8,i)); const title=l.slice(i+1); segs.push({pdt,dur,meta:parseMeta(title)}); if(pdt!=null) pdt+=dur*1000; }
+    else if(l.startsWith('#EXTINF:')){ const i=l.indexOf(','); dur=parseFloat(l.slice(8,i)); const title=l.slice(i+1); segs.push({pdt,dur,meta:parseMeta(title),uri:null}); if(pdt!=null) pdt+=dur*1000; }
+    else if(l && !l.startsWith('#') && segs.length && !segs[segs.length-1].uri) segs[segs.length-1].uri=new URL(l,variantUrl||STREAM).href;
   }
   return segs;
 }
@@ -347,6 +371,7 @@ async function poll(){
     if(pos==null && hls && hls.playingDate) pos=hls.playingDate.getTime();
     if(pos!=null){ for(const s of segs){ if(s.pdt!=null && s.pdt<=pos) pick=s; } }
     if(pick.meta) applyMeta(pick.meta);
+    if(decodeViz) decodeViz.feed(segs,pos);
   }catch(e){ console.warn('meta',e); }
 }
 function startPolling(){ if(pollTimer) return; poll(); pollTimer=setInterval(poll,5000); }
@@ -438,7 +463,9 @@ if('mediaSession' in navigator){
 // the rendered indicator points straight up, which we call 50%: the disc turns -135° (silent) to +135° (full)
 // the knob has detents: min, then 1 through 11. It clicks from one to the next rather than turning freely.
 const STEPS=11; let vol=6/STEPS; let raw=vol;
+let knobHintShown=false;
 const setVol=v=>{ raw=Math.max(0,Math.min(1,v)); const snapped=Math.round(raw*STEPS)/STEPS; const changed=snapped!==vol; vol=snapped;
+  if(changed && iOS && !graphLive && !knobHintShown && audio.currentTime>0){ knobHintShown=true; const h=document.getElementById('knobHint'); h.classList.add('on'); setTimeout(()=>h.classList.remove('on'),3200); }
   if(!callActive) setLevel(vol,.04); el.knob.style.setProperty('--deg',(-135+vol*270)+'deg'); el.knob.setAttribute('aria-valuenow',Math.round(vol*STEPS));
   if(changed){ el.knob.classList.remove('tick'); void el.knob.offsetWidth; el.knob.classList.add('tick'); if(navigator.vibrate) try{ navigator.vibrate(8); }catch(e){} } };
 setVol(vol);
