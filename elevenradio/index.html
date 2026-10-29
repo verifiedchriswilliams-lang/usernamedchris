@@ -140,8 +140,10 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 .knob{position:absolute;left:71.11%;top:33.42%;width:22.04%;aspect-ratio:1;border-radius:50%;cursor:grab;touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none}
 .knob:active{cursor:grabbing}
 .knob:before{content:"";position:absolute;inset:3%;border-radius:50%;background:#141210}
-.knob img{position:absolute;inset:0;width:100%;height:100%;display:block;border-radius:50%;transform:rotate(var(--deg,0deg));transition:transform .06s linear;pointer-events:none;-webkit-user-drag:none}
+.knob img{position:absolute;inset:0;width:100%;height:100%;display:block;border-radius:50%;transform:rotate(var(--deg,0deg));transition:transform .09s cubic-bezier(.2,.9,.3,1.2);pointer-events:none;-webkit-user-drag:none}
 .knob:focus-visible{outline:2px solid var(--warm);outline-offset:4px}
+.knob.tick img{animation:tick .12s ease-out}
+@keyframes tick{0%{filter:brightness(1.18)}100%{filter:brightness(1)}}
 /* tiny top chrome */
 .top{position:fixed;left:0;right:0;top:0;z-index:6;display:flex;justify-content:space-between;align-items:center;padding:max(14px,env(safe-area-inset-top)) 18px 0;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55)}
 .top a{color:inherit;text-decoration:none}
@@ -185,7 +187,7 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 
       <button class="play" id="play" type="button" aria-label="Play"><img src="../media/elevenradio-pause.png?v=2" alt="" width="208" height="208"></button>
 
-      <div class="knob" id="knob" role="slider" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0"><img src="../media/elevenradio-knob.png?v=2" alt="" width="238" height="238"></div>
+      <div class="knob" id="knob" role="slider" aria-label="Volume" aria-valuemin="0" aria-valuemax="11" aria-valuenow="6" tabindex="0"><img src="../media/elevenradio-knob.png?v=2" alt="" width="238" height="238"></div>
       <div class="hint">Press play</div>
     </div>
 
@@ -433,15 +435,19 @@ if('mediaSession' in navigator){
 
 // ===== volume knob (iOS ignores software volume, so it hides there) =====
 // the rendered indicator points straight up, which we call 50%: the disc turns -135° (silent) to +135° (full)
-let vol=0.5; const setVol=v=>{ vol=Math.max(0,Math.min(1,v)); if(!callActive) setLevel(vol,0); el.knob.style.setProperty('--deg',(-135+vol*270)+'deg'); el.knob.setAttribute('aria-valuenow',Math.round(vol*100)); };
+// the knob has detents: min, then 1 through 11. It clicks from one to the next rather than turning freely.
+const STEPS=11; let vol=6/STEPS; let raw=vol;
+const setVol=v=>{ raw=Math.max(0,Math.min(1,v)); const snapped=Math.round(raw*STEPS)/STEPS; const changed=snapped!==vol; vol=snapped;
+  if(!callActive) setLevel(vol,.04); el.knob.style.setProperty('--deg',(-135+vol*270)+'deg'); el.knob.setAttribute('aria-valuenow',Math.round(vol*STEPS));
+  if(changed){ el.knob.classList.remove('tick'); void el.knob.offsetWidth; el.knob.classList.add('tick'); if(navigator.vibrate) try{ navigator.vibrate(8); }catch(e){} } };
 setVol(vol);
 let drag=null;
 const angleAt=e=>{ const r=el.knob.getBoundingClientRect(); return Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2))*180/Math.PI; };
-el.knob.addEventListener('pointerdown',e=>{ e.preventDefault(); drag={a:angleAt(e),v:vol}; el.knob.setPointerCapture(e.pointerId); });
-el.knob.addEventListener('pointermove',e=>{ if(!drag) return; let d=angleAt(e)-drag.a; while(d>180) d-=360; while(d<-180) d+=360; const nv=drag.v+d/270; setVol(nv); if(nv<=0||nv>=1){ drag.a=angleAt(e); drag.v=vol; } });
+el.knob.addEventListener('pointerdown',e=>{ e.preventDefault(); drag={a:angleAt(e),v:vol}; raw=vol; el.knob.setPointerCapture(e.pointerId); });
+el.knob.addEventListener('pointermove',e=>{ if(!drag) return; let d=angleAt(e)-drag.a; while(d>180) d-=360; while(d<-180) d+=360; const nv=drag.v+d/270; setVol(nv); if(nv<=0||nv>=1){ drag.a=angleAt(e); drag.v=raw=Math.max(0,Math.min(1,nv)); } });
 el.knob.addEventListener('pointerup',()=>drag=null); el.knob.addEventListener('pointercancel',()=>drag=null);
-el.knob.addEventListener('wheel',e=>{ e.preventDefault(); setVol(vol-Math.sign(e.deltaY)*0.05); },{passive:false});
-el.knob.addEventListener('keydown',e=>{ if(e.key==='ArrowUp'||e.key==='ArrowRight'){setVol(vol+0.05);e.preventDefault();} if(e.key==='ArrowDown'||e.key==='ArrowLeft'){setVol(vol-0.05);e.preventDefault();} });
+el.knob.addEventListener('wheel',e=>{ e.preventDefault(); setVol(vol-Math.sign(e.deltaY)/STEPS); },{passive:false});
+el.knob.addEventListener('keydown',e=>{ if(e.key==='ArrowUp'||e.key==='ArrowRight'){setVol(vol+1/STEPS);e.preventDefault();} if(e.key==='ArrowDown'||e.key==='ArrowLeft'){setVol(vol-1/STEPS);e.preventDefault();} });
 // space bar toggles
 addEventListener('keydown',e=>{ if(e.code==='Space'&&document.activeElement.tagName!=='BUTTON'){ e.preventDefault(); audio.paused?play():pause(); } });
 </script>
