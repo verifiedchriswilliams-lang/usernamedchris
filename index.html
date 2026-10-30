@@ -218,14 +218,15 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 .belief .close b{color:#fff;font-weight:600}
 @media (max-width:960px){.about{grid-template-columns:1fr;gap:24px}.belief{padding:26px 24px 24px}.belief .big{font-size:26px}}
 @media (max-width:860px){.about .bio p{font-size:16px}}
+@media (max-width:600px){#resume-label span{display:none}}
 /* ===== resume: a collapsed bar under About that unfolds into the full run ===== */
-.thesis{margin-top:14px;padding:30px 32px 26px;border-radius:24px;background:var(--panel);box-shadow:var(--card-shadow);display:grid;grid-template-columns:minmax(220px,.75fr) minmax(0,1.6fr);gap:28px 48px;align-items:start}
-.thesis .k{margin:0 0 10px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.thesis h3{margin:0;font-size:clamp(26px,2.6vw,34px);font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.thesis{margin-top:14px;padding:30px 32px 28px;border-radius:24px;background:var(--panel);box-shadow:var(--card-shadow)}
+.thesis h3{margin:0 0 18px;font-size:clamp(26px,2.6vw,34px);font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.th-body{max-width:78ch}
 .th-body p{margin:0 0 14px;font-size:16.5px;line-height:1.6}
 .th-body p:last-child{margin-bottom:0}
 .th-body b{font-weight:600}
-@media (max-width:860px){.thesis{grid-template-columns:1fr;gap:14px;padding:22px 20px 20px}.th-body p{font-size:15.5px}}
+@media (max-width:860px){.thesis{padding:22px 20px 20px}.thesis h3{margin-bottom:14px}.th-body p{font-size:15.5px}}
 .resume{margin-top:0;border-radius:24px;background:var(--panel);box-shadow:var(--card-shadow);overflow:hidden}
 .resume-toggle{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:22px 26px;border:0;background:transparent;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
 .resume-toggle:hover .rt-hint{color:var(--fg)}
@@ -479,10 +480,7 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 
 <!-- THESIS: always visible, under the station band -->
 <section class="thesis" id="thesis" aria-labelledby="thesisTitle">
-  <div class="th-head">
-    <p class="k">The thinking</p>
-    <h3 id="thesisTitle">The future shape of radio</h3>
-  </div>
+  <h3 id="thesisTitle">The future shape of radio</h3>
   <div class="th-body">
     <p>Radio was never just the music. What turned it into a habit was everything around the songs: a tastemaker deciding what's worth hearing, sequencing that mattered as much as the curation, the attitude between the records (the DJ, the station imaging), a sense that this station was for your tribe, and the feeling that something was happening right now, with everyone else listening too. You never had to do the work. You just tuned in.</p>
     <p>Streaming gave us what one-to-many broadcast couldn't: control, personalization, and a way out of the crushing ad loads. But it never learned radio's tricks. And radio is still stuck in the model it was born with: one broadcast, one sequence, one commercial load, for everyone.</p>

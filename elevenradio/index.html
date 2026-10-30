@@ -306,7 +306,11 @@ function attach(){
     s.onerror=()=>{ useNative(); res(); };
     s.onload=()=>{ if(!Hls.isSupported()){ useNative(); res(); return; }
       hls=new Hls({liveSyncDuration:12,enableWorker:true}); hls.loadSource(STREAM); hls.attachMedia(audio);
-      hls.on(Hls.Events.ERROR,(e,d)=>{ if(d.fatal){ console.warn('hls fatal, going native',d.type); try{ hls.destroy(); }catch(x){} hls=null; useNative(); audio.play().catch(()=>{}); } });
+      hls.on(Hls.Events.ERROR,(e,d)=>{ if(!d.fatal) return;
+        if(d.type==='networkError'){ console.warn('hls network error, retrying'); hls.startLoad(); return; }
+        if(d.type==='mediaError' && !hls._recovered){ console.warn('hls media error, recovering'); hls._recovered=true; hls.recoverMediaError(); return; }
+        if(audio.canPlayType('application/vnd.apple.mpegurl')){ console.warn('hls fatal, going native',d.type); try{ hls.destroy(); }catch(x){} hls=null; useNative(); audio.play().catch(()=>{}); }
+        else console.warn('hls fatal',d.type); });
       hls.on(Hls.Events.FRAG_CHANGED,(e,d)=>{ if(d.frag&&d.frag.title) applyMeta(parseMeta(d.frag.title)); });
       hlsReady=true; res(); };
     document.head.appendChild(s);
