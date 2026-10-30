@@ -219,6 +219,13 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
 @media (max-width:960px){.about{grid-template-columns:1fr;gap:24px}.belief{padding:26px 24px 24px}.belief .big{font-size:26px}}
 @media (max-width:860px){.about .bio p{font-size:16px}}
 /* ===== resume: a collapsed bar under About that unfolds into the full run ===== */
+.thesis{margin-top:14px;padding:30px 32px 26px;border-radius:24px;background:var(--panel);box-shadow:var(--card-shadow);display:grid;grid-template-columns:minmax(220px,.75fr) minmax(0,1.6fr);gap:28px 48px;align-items:start}
+.thesis .k{margin:0 0 10px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.thesis h3{margin:0;font-size:clamp(26px,2.6vw,34px);font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.th-body p{margin:0 0 14px;font-size:16.5px;line-height:1.6}
+.th-body p:last-child{margin-bottom:0}
+.th-body b{font-weight:600}
+@media (max-width:860px){.thesis{grid-template-columns:1fr;gap:14px;padding:22px 20px 20px}.th-body p{font-size:15.5px}}
 .resume{margin-top:0;border-radius:24px;background:var(--panel);box-shadow:var(--card-shadow);overflow:hidden}
 .resume-toggle{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:22px 26px;border:0;background:transparent;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
 .resume-toggle:hover .rt-hint{color:var(--fg)}
@@ -468,6 +475,20 @@ elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:9999;--elevenlab
     <img src="media/elevenradio-pane.jpg" alt="ElevenRadio tuning window locked on the 11 glyph" width="972" height="340">
     <span class="t-glow"></span><span class="t-sheen"></span>
   </a>
+</section>
+
+<!-- THESIS: always visible, under the station band -->
+<section class="thesis" id="thesis" aria-labelledby="thesisTitle">
+  <div class="th-head">
+    <p class="k">The thinking</p>
+    <h3 id="thesisTitle">The future shape of radio</h3>
+  </div>
+  <div class="th-body">
+    <p>Radio was never just the music. What turned it into a habit was everything around the songs: a tastemaker deciding what's worth hearing, sequencing that mattered as much as the curation, the attitude between the records (the DJ, the station imaging), a sense that this station was for your tribe, and the feeling that something was happening right now, with everyone else listening too. You never had to do the work. You just tuned in.</p>
+    <p>Streaming gave us what one-to-many broadcast couldn't: control, personalization, and a way out of the crushing ad loads. But it never learned radio's tricks. And radio is still stuck in the model it was born with: one broadcast, one sequence, one commercial load, for everyone.</p>
+    <p>AI changes what's possible. Every element of radio, the music, the DJ, the requests, the moments, the ads, can be pulled apart and reassembled for each listener, live. One broadcast station becomes millions of personal stations, with the intimacy of one-to-one and the energy of one-to-many. <b>Personal doesn't have to mean alone.</b></p>
+    <p>ElevenRadio is version one: a real station, real programming, and a DJ you can talk to and request songs from. Eventually, every listener gets their own station. <b>This is the beginning of what's next.</b></p>
+  </div>
 </section>
 
 <!-- LINKS -->
