@@ -21,6 +21,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="icon" type="image/png" href="../media/elevenradio-icon.png?v=1">
 <link rel="apple-touch-icon" href="../media/elevenradio-touch.png?v=1">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
+<script defer src="/_vercel/insights/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;600&display=swap">
 <style>
@@ -457,6 +459,14 @@ if(/[?&]debug=1/.test(location.search)){ const d=document.createElement('pre'); 
   setInterval(()=>{ let sum=0; if(analyser){ analyser.getByteFrequencyData(fft); for(let i=0;i<fft.length;i++) sum+=fft[i]; }
     d.textContent=`path: ${hls?'hls.js':(isNative?'native HLS':'none')} graphFirst: ${window._graphFirst}\nMMS: ${'ManagedMediaSource' in window} MSE: ${'MediaSource' in window}\nhls.isSupported: ${window.Hls?Hls.isSupported():'(not loaded)'}\nctx: ${actx?actx.state:'none'} gain: ${gain?gain.gain.value.toFixed(2):'none'}\nanalyser energy: ${sum}\nplaying: ${!audio.paused} t=${audio.currentTime.toFixed(1)} vol=${vol.toFixed(2)}\nerr: ${window._lastErr||''}`; },500);
   addEventListener('error',e=>{ window._lastErr=e.message; }); const w=console.warn; console.warn=(...a)=>{ window._lastErr=a.map(String).join(' ').slice(0,120); w(...a); }; }
+// ===== analytics events =====
+function track(n,p){ try{ window.va&&window.va('event',{name:n,data:p||{}}); }catch(e){} }
+document.getElementById('introTap').addEventListener('click',()=>track('radio_power_on'));
+let firstPlayTracked=false; audio.addEventListener('playing',()=>{ if(!firstPlayTracked){ firstPlayTracked=true; track('radio_play',{path:hls?'hls':'native'}); } });
+el.play.addEventListener('click',()=>track(audio.paused?'radio_resume':'radio_pause'));
+el.req.addEventListener('click',()=>track('request_line',{song:current?current.title:'',artist:current?current.artist:''}));
+document.getElementById('endCall').addEventListener('click',()=>track('request_line_hangup'));
+let listenMins=0; setInterval(()=>{ if(!audio.paused){ listenMins++; if(listenMins===1||listenMins===5||listenMins===15||listenMins===30) track('listen_minutes',{minutes:listenMins}); } },60000);
 // ===== media session controls (lock screen / Dynamic Island) =====
 if('mediaSession' in navigator){
   navigator.mediaSession.setActionHandler('play',play);

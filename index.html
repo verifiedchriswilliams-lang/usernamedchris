@@ -19,6 +19,8 @@
 <meta name="color-scheme" content="light only">
 <meta name="theme-color" content="#F5F1EC">
 <style>html{color-scheme:light only}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
+<script defer src="/_vercel/insights/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;600&display=swap">
 <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
@@ -578,6 +580,15 @@ document.querySelectorAll('.avatar').forEach(el=>el.addEventListener('keydown',e
       const tt=document.getElementById('thTitle'),ta=document.getElementById('thArtist'),tc=document.getElementById('thCover'); if(tt){ tt.textContent=j.current.title||'Different Here'; ta.textContent=j.current.artist||''; if(j.current.image) tc.style.backgroundImage=`url("${j.current.image}")`; } }
   }catch(e){} }
   tick(); setInterval(tick,15000); })();
+// ===== analytics events (Vercel Web Analytics) =====
+function track(n,p){ try{ window.va&&window.va('event',{name:n,data:p||{}}); }catch(e){} }
+document.getElementById('openAgent')&&document.getElementById('openAgent').addEventListener('click',()=>track('talk_now',{from:'hero'}));
+document.querySelectorAll('.avatar').forEach(el=>el.addEventListener('click',()=>track('talk_now',{from:'avatar'})));
+document.querySelectorAll('a[href="/elevenradio/"]').forEach(el=>el.addEventListener('click',()=>track('tune_in',{from:el.className.includes('teaser')?'teaser':(el.className.includes('th-stage')?'thesis':'band')})));
+document.querySelectorAll('.card').forEach(el=>el.addEventListener('click',()=>track('side_quest',{site:new URL(el.href).host})));
+document.getElementById('resumeToggle')&&document.getElementById('resumeToggle').addEventListener('click',()=>track('resume_toggle'));
+document.querySelectorAll('.links a').forEach(el=>el.addEventListener('click',()=>track('elsewhere',{to:el.querySelector('b')?el.querySelector('b').textContent:el.href})));
+document.querySelectorAll('.rail a').forEach(el=>el.addEventListener('click',()=>track('nav',{to:el.textContent.trim()})));
 // card glare + play only on screen
 document.querySelectorAll('.card').forEach(c=>c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect();const g=c.querySelector('.glare');g.style.left=(e.clientX-r.left)+'px';g.style.top=(e.clientY-r.top)+'px'}));
 if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(x=>{const v=x.target;x.isIntersecting?v.play().catch(()=>{}):v.pause()}),{threshold:.15});document.querySelectorAll('video').forEach(v=>io.observe(v));}
