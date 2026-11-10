@@ -128,6 +128,7 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 .call .end svg{width:52%;height:52%;fill:none;stroke:#ff6b5e;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transform:rotate(135deg)}
 .call .end span{font-family:var(--mono);font-size:clamp(6px,calc(var(--ph,100px)*.075),9px);letter-spacing:.14em;text-transform:uppercase;line-height:1.2;opacity:.9}
 /* while on the line with Kip, the glyph breathes white instead of red/blue */
+.call .how.msg{white-space:normal;line-height:1.35}.call .how a{color:#fff;text-decoration:underline;text-underline-offset:2px}
 .oncall .glow{opacity:1;animation:breathe 2.2s ease-in-out infinite;transform:none;background:radial-gradient(45% 60% at 50% 50%,rgba(243,217,166,.6),transparent 70%)}
 .oncall .off{background:rgba(0,0,0,.0)}
 /* progress hairline under the pane text */
@@ -419,7 +420,22 @@ async function stationBack(){
   if(audio.paused){ setLevel(0,0); if(hls) hls.startLoad(-1); await play(); await wait(250); }
   await fadeTo(vol,1.2);
 }
-function setHow(t,cls){ how.textContent=t; orb.className='orb'+(cls?' '+cls:''); }
+function setHow(t,cls){ how.classList.remove('msg'); how.textContent=t; orb.className='orb'+(cls?' '+cls:''); }
+// In-app browsers (LinkedIn, Facebook, Instagram, Android WebViews) often cannot use the microphone. When the call
+// cannot start, say why, keep it on screen long enough to read, and offer the way out.
+const UA=navigator.userAgent, isAndroid=/Android/.test(UA), inApp=/LinkedInApp|FBAN|FBAV|FB_IAB|Instagram|; wv\)/.test(UA);
+let failTimer=null;
+function callFail(reason){
+  track('request_line_failed',{reason,inapp:inApp?'yes':'no',os:isAndroid?'android':(mobile?'ios':'desktop')});
+  setHow(''); how.classList.add('msg');
+  const micIssue=reason==='mic'||reason==='nomic';
+  if(micIssue&&inApp&&isAndroid){ const a=document.createElement('a'); a.href='intent://usernamedchris.com/elevenradio/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fusernamedchris.com%2Felevenradio%2F;end'; a.textContent='Open in Chrome to call Kip'; a.addEventListener('click',()=>track('request_line_open_browser')); how.appendChild(a); }
+  else if(micIssue&&inApp) how.textContent='Open in Safari to call Kip';
+  else if(reason==='mic') how.textContent='Mic blocked. Allow it and retry';
+  else if(reason==='nomic') how.textContent='No microphone found';
+  else how.textContent='Could not connect. Try again';
+  clearTimeout(failTimer); failTimer=setTimeout(()=>endCall(true),micIssue?9000:4000);
+}
 async function startCall(){
   if(callActive) return; callActive=true; body.classList.add('oncall'); setHow('Connecting');
   try{
@@ -427,22 +443,24 @@ async function startCall(){
     await stationOut();           // 1. radio down and stopped, in silence
     await wait(120);              // 2. let the output route settle
     await sdk;
-    const mic=await navigator.mediaDevices.getUserMedia({audio:true});   // 3. now take the mic
+    let mic;                                                             // 3. now take the mic
+    try{ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia) throw new Error('NoMediaDevices'); mic=await navigator.mediaDevices.getUserMedia({audio:true}); }
+    catch(e){ console.warn('mic failed',e); if(callActive) callFail(/NotFound|NoMediaDevices|NotSupported/i.test(String(e&&e.name)+String(e))?'nomic':'mic'); return; }
     mic.getTracks().forEach(t=>t.stop());                                // the SDK opens its own; this was just the permission
     if(!callActive) return;
     convo=await ElevenLabsClient.Conversation.startSession({             // 4. connect
       agentId:KIP_AGENT_ID, connectionType:'websocket',
-      onConnect:()=>{ setHow('On the line','listening'); lvlTimer=setInterval(()=>{ try{ const v=convo.getOutputVolume?convo.getOutputVolume():0; const u=convo.getInputVolume?convo.getInputVolume():0; lvl.style.width=Math.round(Math.max(v,u)*100)+'%'; }catch(e){} },100); },
+      onConnect:()=>{ track('request_line_connected'); setHow('On the line','listening'); lvlTimer=setInterval(()=>{ try{ const v=convo.getOutputVolume?convo.getOutputVolume():0; const u=convo.getInputVolume?convo.getInputVolume():0; lvl.style.width=Math.round(Math.max(v,u)*100)+'%'; }catch(e){} },100); },
       onModeChange:m=>{ setHow(m.mode==='speaking'?'Kip is talking':'Listening', m.mode==='speaking'?'speaking':'listening'); },
       onDisconnect:()=>endCall(true),
-      onError:(msg)=>{ console.warn('kip',msg); setHow('Line dropped'); setTimeout(()=>endCall(true),1200); },
+      onError:(msg)=>{ console.warn('kip',msg); track('request_line_failed',{reason:'dropped'}); setHow('Line dropped'); setTimeout(()=>endCall(true),1200); },
     });
     if('mediaSession' in navigator) navigator.mediaSession.metadata=new MediaMetadata({title:'On the line with Kip',artist:STATION,album:STATION});
-  }catch(e){ console.warn('call failed',e); setHow(/NotAllowed|Permission/i.test(String(e))?'Mic blocked':'Could not connect'); setTimeout(()=>endCall(true),1600); }
+  }catch(e){ console.warn('call failed',e); if(callActive) callFail(/NotAllowed|Permission/i.test(String(e))?'mic':'connect'); }
 }
 let ending=false;
 async function endCall(fromRemote){
-  if(!callActive||ending) return; ending=true; callActive=false; clearInterval(lvlTimer); lvl.style.width='0';
+  if(!callActive||ending) return; ending=true; callActive=false; clearTimeout(failTimer); clearInterval(lvlTimer); lvl.style.width='0';
   setHow('Hanging up');
   try{ if(convo && !fromRemote) await convo.endSession(); }catch(e){} convo=null;   // 1. drop the line, release the mic
   await wait(mobile?450:150);                                                        // 2. let the route switch back
