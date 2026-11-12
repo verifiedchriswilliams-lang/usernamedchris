@@ -7,12 +7,12 @@
 <meta name="description" content="A.I.R.adio. Human curated, AI hosted, listener influenced. Tune in.">
 <meta property="og:title" content="A.I.R.adio">
 <meta property="og:description" content="Human curated. AI hosted. Listener influenced. Personal doesn't have to mean alone.">
-<meta property="og:image" content="https://usernamedchris.com/media/share-air.png?v=1">
+<meta property="og:image" content="https://usernamedchris.com/media/share-air.png?v=2">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:type" content="website">
 <meta name="twitter:title" content="A.I.R.adio">
-<meta name="twitter:image" content="https://usernamedchris.com/media/share-air.png?v=1">
+<meta name="twitter:image" content="https://usernamedchris.com/media/share-air.png?v=2">
 <meta property="og:url" content="https://usernamedchris.com/air/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="color-scheme" content="dark">
@@ -164,9 +164,9 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 <div class="top"><a href="/">← usernamedchris.com</a><span><span class="nm">A.I.R.adio</span> · Live</span></div>
 <div class="stage">
   <div class="device" id="device">
-    <img class="art" src="../media/air-radio.jpg?v=5" alt="A.I.R.adio transistor radio" width="1080" height="1918">
+    <img class="art" src="../media/air-radio.jpg?v=6" alt="A.I.R.adio transistor radio" width="1080" height="1918">
     <div class="off"></div>
-    <div class="tint" id="tint" aria-hidden="true"><img src="../media/air-radio.jpg?v=5" alt="" width="1080" height="1918"></div>
+    <div class="tint" id="tint" aria-hidden="true"><img src="../media/air-radio.jpg?v=6" alt="" width="1080" height="1918"></div>
     <div class="glow" id="glow"></div>
     <div class="core" id="core"></div>
     <div class="ledwash"></div>
@@ -198,7 +198,7 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
     </div>
 
     <div class="intro" id="intro">
-      <video id="introVid" playsinline preload="auto" src="../media/air-intro.mp4?v=1"></video>
+      <video id="introVid" playsinline preload="auto" src="../media/air-intro.mp4?v=2"></video>
       <img class="still" id="still" src="../media/air-first.jpg?v=1" alt="" width="1080" height="1918">
       <button class="introtap" id="introTap" type="button" aria-label="Power on A.I.R.adio"></button>
       <div class="hint tap" id="tapHint">Tap play</div>
@@ -488,7 +488,7 @@ let listenMins=0; setInterval(()=>{ if(!audio.paused){ listenMins++; if(listenMi
 if('mediaSession' in navigator){
   navigator.mediaSession.setActionHandler('play',play);
   navigator.mediaSession.setActionHandler('pause',pause);
-  navigator.mediaSession.metadata=new MediaMetadata({title:TAGLINE,artist:STATION,album:STATION,artwork:[{src:location.origin+'/media/air-radio.jpg?v=5',sizes:'1080x1918',type:'image/jpeg'}]});
+  navigator.mediaSession.metadata=new MediaMetadata({title:TAGLINE,artist:STATION,album:STATION,artwork:[{src:location.origin+'/media/air-radio.jpg?v=6',sizes:'1080x1918',type:'image/jpeg'}]});
 }
 
 // ===== volume knob (iOS ignores software volume, so it hides there) =====
