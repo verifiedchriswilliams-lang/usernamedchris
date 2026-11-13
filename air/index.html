@@ -3,24 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<title>A.I.R.adio</title>
-<meta name="description" content="A.I.R.adio. Human curated, AI hosted, listener influenced. Tune in.">
-<meta property="og:title" content="A.I.R.adio">
+<title>A.I.Radio</title>
+<meta name="description" content="A.I.Radio. Human curated, AI hosted, listener influenced. Tune in.">
+<meta property="og:title" content="A.I.Radio">
 <meta property="og:description" content="Human curated. AI hosted. Listener influenced. Personal doesn't have to mean alone.">
-<meta property="og:image" content="https://usernamedchris.com/media/share-air.png?v=2">
+<meta property="og:image" content="https://usernamedchris.com/media/share-air.png?v=3">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:type" content="website">
-<meta name="twitter:title" content="A.I.R.adio">
-<meta name="twitter:image" content="https://usernamedchris.com/media/share-air.png?v=2">
+<meta name="twitter:title" content="A.I.Radio">
+<meta name="twitter:image" content="https://usernamedchris.com/media/share-air.png?v=3">
 <meta property="og:url" content="https://usernamedchris.com/air/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="icon" type="image/png" href="../media/air-icon.png?v=1">
-<link rel="apple-touch-icon" href="../media/air-touch.png?v=1">
+<link rel="icon" type="image/png" href="../media/air-icon.png?v=2">
+<link rel="apple-touch-icon" href="../media/air-touch.png?v=2">
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
 <script defer src="/_vercel/insights/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -161,12 +161,12 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 </style>
 </head>
 <body class="idle">
-<div class="top"><a href="/">← usernamedchris.com</a><span><span class="nm">A.I.R.adio</span> · Live</span></div>
+<div class="top"><a href="/">← usernamedchris.com</a><span><span class="nm">A.I.Radio</span> · Live</span></div>
 <div class="stage">
   <div class="device" id="device">
-    <img class="art" src="../media/air-radio.jpg?v=6" alt="A.I.R.adio transistor radio" width="1080" height="1918">
+    <img class="art" src="../media/air-radio.jpg?v=7" alt="A.I.Radio transistor radio" width="1080" height="1918">
     <div class="off"></div>
-    <div class="tint" id="tint" aria-hidden="true"><img src="../media/air-radio.jpg?v=6" alt="" width="1080" height="1918"></div>
+    <div class="tint" id="tint" aria-hidden="true"><img src="../media/air-radio.jpg?v=7" alt="" width="1080" height="1918"></div>
     <div class="glow" id="glow"></div>
     <div class="core" id="core"></div>
     <div class="ledwash"></div>
@@ -176,7 +176,7 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
         <div class="np">
         <div class="cover fallback" id="cover"></div>
         <div class="txt">
-          <div class="st"><span id="st">A.I.R.adio</span></div>
+          <div class="st"><span id="st">A.I.Radio</span></div>
           <div class="ti" id="tiWrap"><span id="ti">Different Here</span></div>
           <div class="ar" id="ar">Tap play to tune in</div>
         </div>
@@ -198,9 +198,9 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
     </div>
 
     <div class="intro" id="intro">
-      <video id="introVid" playsinline preload="auto" src="../media/air-intro.mp4?v=2"></video>
-      <img class="still" id="still" src="../media/air-first.jpg?v=1" alt="" width="1080" height="1918">
-      <button class="introtap" id="introTap" type="button" aria-label="Power on A.I.R.adio"></button>
+      <video id="introVid" playsinline preload="auto" src="../media/air-intro.mp4?v=3"></video>
+      <img class="still" id="still" src="../media/air-first.jpg?v=2" alt="" width="1080" height="1918">
+      <button class="introtap" id="introTap" type="button" aria-label="Power on A.I.Radio"></button>
       <div class="hint tap" id="tapHint">Tap play</div>
     </div>
   </div>
@@ -210,8 +210,8 @@ html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--font
 
 <script>
 // ===== config =====
-const STREAM = 'https://kphld.superhifi.radio/cw/playlist.m3u8'; // A.I.R.adio, via Super Hi-Fi
-const STATION = 'A.I.R.adio';
+const STREAM = 'https://kphld.superhifi.radio/cw/playlist.m3u8'; // A.I.Radio, via Super Hi-Fi
+const STATION = 'A.I.Radio';
 const TAGLINE = 'Different Here';
 const INTRO_EVERY_VISIT = true;
 const KIP_AGENT_ID = 'agent_4201m4511hnzebhrexm3pjhq48fc'; // Kip: Keep It Playing
@@ -488,7 +488,7 @@ let listenMins=0; setInterval(()=>{ if(!audio.paused){ listenMins++; if(listenMi
 if('mediaSession' in navigator){
   navigator.mediaSession.setActionHandler('play',play);
   navigator.mediaSession.setActionHandler('pause',pause);
-  navigator.mediaSession.metadata=new MediaMetadata({title:TAGLINE,artist:STATION,album:STATION,artwork:[{src:location.origin+'/media/air-radio.jpg?v=6',sizes:'1080x1918',type:'image/jpeg'}]});
+  navigator.mediaSession.metadata=new MediaMetadata({title:TAGLINE,artist:STATION,album:STATION,artwork:[{src:location.origin+'/media/air-radio.jpg?v=7',sizes:'1080x1918',type:'image/jpeg'}]});
 }
 
 // ===== volume knob (iOS ignores software volume, so it hides there) =====
